@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "FlowMind",
+    "tagline": "Muvaffaqiyat sari oqim bilan yuring.",
+    "loading": "Yuklanmoqda...",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "add": "Qo'shish",
+    "done": "Bajarildi",
+    "back": "Orqaga",
+    "next": "Keyingi",
+    "comingSoon": "Tez kunda...",
+    "logout": "Chiqish",
+    "settings": "Sozlamalar"
+  },
+  "nav": {
+    "dashboard": "Bosh sahifa",
+    "planner": "Rejalashtirish",
+    "goals": "Maqsadlar",
+    "pomodoro": "Pomodoro",
+    "aiChat": "AI Chat",
+    "analytics": "Tahlil"
+  },
+  "auth": {
+    "welcomeBack": "Xush kelibsiz",
+    "createAccount": "Hisob yarating",
+    "email": "Elektron pochta",
+    "username": "Foydalanuvchi nomi",
+    "password": "Parol",
+    "confirmPassword": "Parolni tasdiqlang",
+    "occupation": "Kasb",
+    "occupationPlaceholder": "Talaba, Dasturchi, Dizayner...",
+    "timezone": "Vaqt zonasi",
+    "signIn": "Kirish",
+    "signingIn": "Kirilmoqda...",
+    "creatingAccount": "Hisob yaratilmoqda...",
+    "noAccount": "Hisobingiz yo'qmi?",
+    "haveAccount": "Hisobingiz bormi?",
+    "createOne": "Yarating",
+    "signInLink": "Kirish",
+    "invalidCredentials": "Noto'g'ri email yoki parol.",
+    "passwordMismatch": "Parollar mos kelmaydi.",
+    "optional": "ixtiyoriy"
+  },
+  "dashboard": {
+    "goodMorning": "Xayrli tong",
+    "goodAfternoon": "Xayrli kun",
+    "goodEvening": "Xayrli kech",
+    "todayPlan": "Bugungi reja",
+    "activeGoals": "Faol maqsadlar",
+    "focusTime": "Diqqat vaqti",
+    "streak": "Kunlik seriya",
+    "aiCoach": "AI murabbiyingiz xabar yubordi",
+    "viewFullPlan": "To'liq rejani ko'rish →",
+    "tasksCompleted": "vazifa bajarildi bugun",
+    "weeklyCompletion": "Haftalik bajarilish",
+    "noTasksToday": "Bugun hali vazifalar yo'q",
+    "addFirstTask": "Birinchi vazifani qo'shing"
+  },
+  "goals": {
+    "title": "Maqsadlarim",
+    "addGoal": "Maqsad qo'shish",
+    "noGoals": "Hali maqsadlar yo'q",
+    "progress": "Jarayon",
+    "deadline": "Muddat",
+    "milestones": "Bosqichlar",
+    "addMilestone": "Bosqich qo'shish",
+    "aiFeedback": "AI fikri",
+    "getAiFeedback": "AI fikrini olish",
+    "categories": {
+      "study": "O'qish",
+      "fitness": "Sport",
+      "personal": "Shaxsiy",
+      "work": "Ish",
+      "finance": "Moliya",
+      "health": "Sog'liq",
+      "other": "Boshqa"
+    },
+    "status": {
+      "active": "Faol",
+      "completed": "Bajarildi",
+      "paused": "To'xtatildi",
+      "cancelled": "Bekor qilindi"
+    }
+  },
+  "planner": {
+    "title": "Kunlik rejalashtirish",
+    "addTask": "Vazifa qo'shish",
+    "noTasks": "Bugun vazifalar yo'q",
+    "startTime": "Boshlanish vaqti",
+    "duration": "Davomiyligi",
+    "category": "Toifa",
+    "priority": "Muhimlik",
+    "getAiFeedback": "AI rejamni baholash",
+    "priorities": {
+      "low": "Past",
+      "medium": "O'rta",
+      "high": "Yuqori"
+    }
+  },
+  "pomodoro": {
+    "title": "Pomodoro taymer",
+    "focusSession": "Diqqat sessiyasi",
+    "shortBreak": "Qisqa tanaffus",
+    "longBreak": "Uzun tanaffus",
+    "start": "Boshlash",
+    "pause": "To'xtatish",
+    "resume": "Davom ettirish",
+    "cancel": "Bekor qilish",
+    "reset": "Qayta o'rnatish",
+    "sessionsToday": "Bugungi sessiyalar",
+    "focusHours": "Diqqat soatlari",
+    "settings": "Taymer sozlamalari",
+    "focusMinutes": "Diqqat daqiqalari",
+    "shortBreakMinutes": "Qisqa tanaffus daqiqalari",
+    "longBreakMinutes": "Uzun tanaffus daqiqalari",
+    "sessionsBeforeLongBreak": "Uzun tanaffusgacha sessiyalar"
+  },
+  "chat": {
+    "title": "AI Chat",
+    "placeholder": "AI murabbiyingizdan biror narsa so'rang...",
+    "send": "Yuborish",
+    "thinking": "O'ylamoqda...",
+    "emptyState": "AI murabbiyingiz bilan suhbat boshlang!"
+  },
+  "analytics": {
+    "title": "Tahlil",
+    "weeklyStats": "Bu hafta",
+    "monthlyStats": "Bu oy",
+    "completionRate": "Bajarilish darajasi",
+    "focusHours": "Diqqat soatlari",
+    "totalTasks": "Jami vazifalar",
+    "bestDay": "Eng yaxshi kun",
+    "weeklySummary": "AI haftalik xulosa",
+    "getAiSummary": "AI xulosasini olish"
+  }
+}

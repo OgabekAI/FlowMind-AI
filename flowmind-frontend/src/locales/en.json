@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "FlowMind",
+    "tagline": "Get in the flow. Master your mind.",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "done": "Done",
+    "back": "Back",
+    "next": "Next",
+    "comingSoon": "Coming soon...",
+    "logout": "Logout",
+    "settings": "Settings"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "planner": "Planner",
+    "goals": "Goals",
+    "pomodoro": "Pomodoro",
+    "aiChat": "AI Chat",
+    "analytics": "Analytics"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create your account",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "occupation": "Occupation",
+    "occupationPlaceholder": "Student, Developer, Designer...",
+    "timezone": "Timezone",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "createOne": "Create one",
+    "signInLink": "Sign in",
+    "invalidCredentials": "Invalid email or password.",
+    "passwordMismatch": "Passwords do not match.",
+    "optional": "optional"
+  },
+  "dashboard": {
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "todayPlan": "Today's Plan",
+    "activeGoals": "Active Goals",
+    "focusTime": "Focus Time",
+    "streak": "Day Streak",
+    "aiCoach": "Your AI Coach has a message",
+    "viewFullPlan": "View full plan →",
+    "tasksCompleted": "tasks completed today",
+    "weeklyCompletion": "Weekly Completion",
+    "noTasksToday": "No tasks for today yet",
+    "addFirstTask": "Add your first task"
+  },
+  "goals": {
+    "title": "My Goals",
+    "addGoal": "Add Goal",
+    "noGoals": "No goals yet",
+    "progress": "Progress",
+    "deadline": "Deadline",
+    "milestones": "Milestones",
+    "addMilestone": "Add Milestone",
+    "aiFeedback": "AI Feedback",
+    "getAiFeedback": "Get AI Feedback",
+    "categories": {
+      "study": "Study",
+      "fitness": "Fitness",
+      "personal": "Personal",
+      "work": "Work",
+      "finance": "Finance",
+      "health": "Health",
+      "other": "Other"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "paused": "Paused",
+      "cancelled": "Cancelled"
+    }
+  },
+  "planner": {
+    "title": "Daily Planner",
+    "addTask": "Add Task",
+    "noTasks": "No tasks for today",
+    "startTime": "Start Time",
+    "duration": "Duration",
+    "category": "Category",
+    "priority": "Priority",
+    "getAiFeedback": "Get AI Feedback on my plan",
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
+  },
+  "pomodoro": {
+    "title": "Pomodoro Timer",
+    "focusSession": "Focus Session",
+    "shortBreak": "Short Break",
+    "longBreak": "Long Break",
+    "start": "Start",
+    "pause": "Pause",
+    "resume": "Resume",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "sessionsToday": "Sessions Today",
+    "focusHours": "Focus Hours",
+    "settings": "Timer Settings",
+    "focusMinutes": "Focus Minutes",
+    "shortBreakMinutes": "Short Break Minutes",
+    "longBreakMinutes": "Long Break Minutes",
+    "sessionsBeforeLongBreak": "Sessions Before Long Break"
+  },
+  "chat": {
+    "title": "AI Chat",
+    "placeholder": "Ask your AI coach anything...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "emptyState": "Start a conversation with your AI coach!"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "weeklyStats": "This Week",
+    "monthlyStats": "This Month",
+    "completionRate": "Completion Rate",
+    "focusHours": "Focus Hours",
+    "totalTasks": "Total Tasks",
+    "bestDay": "Best Day",
+    "weeklySummary": "AI Weekly Summary",
+    "getAiSummary": "Get AI Summary"
+  }
+}

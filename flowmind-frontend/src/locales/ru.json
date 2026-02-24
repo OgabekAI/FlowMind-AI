@@ -1,0 +1,139 @@
+{
+  "common": {
+    "appName": "FlowMind",
+    "tagline": "Войдите в поток. Управляйте разумом.",
+    "loading": "Загрузка...",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "add": "Добавить",
+    "done": "Готово",
+    "back": "Назад",
+    "next": "Далее",
+    "comingSoon": "Скоро...",
+    "logout": "Выйти",
+    "settings": "Настройки"
+  },
+  "nav": {
+    "dashboard": "Главная",
+    "planner": "Планировщик",
+    "goals": "Цели",
+    "pomodoro": "Помодоро",
+    "aiChat": "ИИ Чат",
+    "analytics": "Аналитика"
+  },
+  "auth": {
+    "welcomeBack": "С возвращением",
+    "createAccount": "Создать аккаунт",
+    "email": "Эл. почта",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "occupation": "Профессия",
+    "occupationPlaceholder": "Студент, Разработчик, Дизайнер...",
+    "timezone": "Часовой пояс",
+    "signIn": "Войти",
+    "signingIn": "Вход...",
+    "creatingAccount": "Создание аккаунта...",
+    "noAccount": "Нет аккаунта?",
+    "haveAccount": "Уже есть аккаунт?",
+    "createOne": "Создать",
+    "signInLink": "Войти",
+    "invalidCredentials": "Неверный email или пароль.",
+    "passwordMismatch": "Пароли не совпадают.",
+    "optional": "необязательно"
+  },
+  "dashboard": {
+    "goodMorning": "Доброе утро",
+    "goodAfternoon": "Добрый день",
+    "goodEvening": "Добрый вечер",
+    "todayPlan": "План на сегодня",
+    "activeGoals": "Активные цели",
+    "focusTime": "Время фокуса",
+    "streak": "Серия дней",
+    "aiCoach": "Ваш ИИ-тренер отправил сообщение",
+    "viewFullPlan": "Посмотреть полный план →",
+    "tasksCompleted": "задач выполнено сегодня",
+    "weeklyCompletion": "Недельное выполнение",
+    "noTasksToday": "Задач на сегодня нет",
+    "addFirstTask": "Добавьте первую задачу"
+  },
+  "goals": {
+    "title": "Мои цели",
+    "addGoal": "Добавить цель",
+    "noGoals": "Целей пока нет",
+    "progress": "Прогресс",
+    "deadline": "Срок",
+    "milestones": "Этапы",
+    "addMilestone": "Добавить этап",
+    "aiFeedback": "Обратная связь ИИ",
+    "getAiFeedback": "Получить совет ИИ",
+    "categories": {
+      "study": "Учёба",
+      "fitness": "Фитнес",
+      "personal": "Личное",
+      "work": "Работа",
+      "finance": "Финансы",
+      "health": "Здоровье",
+      "other": "Другое"
+    },
+    "status": {
+      "active": "Активна",
+      "completed": "Выполнена",
+      "paused": "На паузе",
+      "cancelled": "Отменена"
+    }
+  },
+  "planner": {
+    "title": "Ежедневный планировщик",
+    "addTask": "Добавить задачу",
+    "noTasks": "Задач на сегодня нет",
+    "startTime": "Время начала",
+    "duration": "Длительность",
+    "category": "Категория",
+    "priority": "Приоритет",
+    "getAiFeedback": "Оценить план с помощью ИИ",
+    "priorities": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий"
+    }
+  },
+  "pomodoro": {
+    "title": "Таймер Помодоро",
+    "focusSession": "Сессия фокуса",
+    "shortBreak": "Короткий перерыв",
+    "longBreak": "Длинный перерыв",
+    "start": "Старт",
+    "pause": "Пауза",
+    "resume": "Продолжить",
+    "cancel": "Отмена",
+    "reset": "Сброс",
+    "sessionsToday": "Сессий сегодня",
+    "focusHours": "Часов фокуса",
+    "settings": "Настройки таймера",
+    "focusMinutes": "Минуты фокуса",
+    "shortBreakMinutes": "Минуты короткого перерыва",
+    "longBreakMinutes": "Минуты длинного перерыва",
+    "sessionsBeforeLongBreak": "Сессий до длинного перерыва"
+  },
+  "chat": {
+    "title": "ИИ Чат",
+    "placeholder": "Спросите вашего ИИ-тренера...",
+    "send": "Отправить",
+    "thinking": "Думаю...",
+    "emptyState": "Начните разговор с вашим ИИ-тренером!"
+  },
+  "analytics": {
+    "title": "Аналитика",
+    "weeklyStats": "Эта неделя",
+    "monthlyStats": "Этот месяц",
+    "completionRate": "Процент выполнения",
+    "focusHours": "Часов фокуса",
+    "totalTasks": "Всего задач",
+    "bestDay": "Лучший день",
+    "weeklySummary": "Еженедельный отчёт ИИ",
+    "getAiSummary": "Получить отчёт ИИ"
+  }
+}
