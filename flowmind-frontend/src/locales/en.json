@@ -1,4 +1,5 @@
 {
+  
   "dashboard": {
     "goodMorning": "Good morning",
     "goodAfternoon": "Good afternoon",
@@ -79,6 +80,7 @@
   },
   "pomodoro": {
     "title": "Pomodoro Timer",
+    "tagline": "Each interval, a new beginning. Each moment, a chance.",
     "focusSession": "Focus Session",
     "shortBreak": "Short Break",
     "longBreak": "Long Break",
@@ -162,6 +164,10 @@
     "Sat": "Sat",
     "Sun": "Sun"
   },
+  "units": {
+    "hour": "h",
+    "minute": "min"
+  },
   "common": {
     "profile": "Profile",
     "appName": "FlowMind",
@@ -180,7 +186,11 @@
     "settings": "Settings",
     "title": "Title",
     "of": "of",
-    "total": "total"
+    "total": "total",
+    "hourUnit": "h",
+    "minuteUnit": "min",
+    "dayUnit": "d",
+    "daysRemaining": "days remaining"
   },
   "nav": {
     "dashboard": "Dashboard",

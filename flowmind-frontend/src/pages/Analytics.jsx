@@ -120,7 +120,7 @@ export default function Analytics() {
           {[
             { icon: '✅', value: stats?.summary?.completed_tasks || 0, label: t('analytics.completionRate'), sub: `${t('common.of', 'of')} ${stats?.summary?.total_tasks || 0} ${t('analytics.totalTasks').toLowerCase()}`, accent: '#7c6aff' },
             { icon: '🔥', value: `${rate}%`, label: t('analytics.completionRate'), sub: rate >= 70 ? t('analytics.excellent') : rate >= 40 ? t('analytics.good') : t('analytics.keepGoing'), accent: rateColor, subColor: rateColor },
-            { icon: '⏱️', value: `${stats?.summary?.total_focus_hours || 0}h`, label: t('analytics.focusHours'), accent: '#4fc3f7' },
+            { icon: '⏱️', value: `${stats?.summary?.total_focus_hours || 0}${t('units.hour')}`, label: t('analytics.focusHours'), accent: '#4fc3f7' },
             { icon: '⭐', value: stats?.summary?.best_day ? translateDayName(stats.summary.best_day) : '—', label: t('analytics.bestDay'), accent: '#43e97b' },
           ].map((s, i) => (
             <div key={i} style={{ ...GLASS, borderRadius: 20, padding: '20px 22px', position: 'relative', overflow: 'hidden', transition: 'all 0.2s' }}

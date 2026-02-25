@@ -202,9 +202,7 @@ export default function Pomodoro() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', maxWidth: 760, marginBottom: 36 }}>
           <div>
             <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 30, margin: 0 }}>{t('pomodoro.title')}</h1>
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, marginTop: 5 }}>
-              {stats?.today?.sessions || 0} {t('pomodoro.sessionsToday')} · {stats?.today?.focus_hours || 0}h {t('pomodoro.focusHours')}
-            </p>
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, marginTop: 5 }}>{t('pomodoro.tagline')}</p>
           </div>
           <button
             onClick={() => setShowSettings(true)}
@@ -415,7 +413,7 @@ export default function Pomodoro() {
         }}>
           {[
             { value: stats?.today?.sessions || 0, label: t('pomodoro.sessionsToday') },
-            { value: `${stats?.today?.focus_hours || 0}h`, label: t('pomodoro.focusHours') },
+            { value: `${stats?.today?.focus_hours || 0}${t('units.hour')}`, label: t('pomodoro.focusHours') },
             { value: stats?.all_time?.sessions || 0, label: t('pomodoro.allTimeSessions') },
           ].map((s, i) => (
             <div key={i} style={{

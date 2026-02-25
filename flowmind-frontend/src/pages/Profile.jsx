@@ -151,23 +151,6 @@ export default function Profile() {
             </form>
           </div>
 
-          {/* APP INFO */}
-          <div style={{ ...GLASS, padding: 24 }}>
-            <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 16, marginBottom: 16 }}>📱 {t('profile.appInfo')}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                { label: t('profile.version'), value: '1.0.0' },
-                { label: t('profile.aiModel'), value: 'Llama 3.3 70B' },
-                { label: t('profile.languages'), value: '🇬🇧 EN · 🇺🇿 UZ · 🇷🇺 RU' },
-              ].map(({ label, value }) => (
-                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>{label}</span>
-                  <span style={{ color: '#fff', fontSize: 13, fontWeight: 500 }}>{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

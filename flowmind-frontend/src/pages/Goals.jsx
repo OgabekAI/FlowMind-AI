@@ -211,7 +211,7 @@ export default function Goals() {
                     <span style={{ background: sc.bg, color: sc.color, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 8 }}>{t(`goals.status.${goal.status}`)}</span>
                     {goal.deadline && (
                       <span style={{ fontSize: 11, color: goal.is_overdue ? '#ff6b6b' : 'rgba(255,255,255,0.4)' }}>
-                        {goal.is_overdue ? '⚠️ Overdue' : `📅 ${goal.days_remaining}d left`}
+                        {goal.is_overdue ? `⚠️ ${t('common.overdue')}` : `📅 ${goal.days_remaining} ${t('common.daysRemaining')}`}
                       </span>
                     )}
                   </div>

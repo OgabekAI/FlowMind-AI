@@ -24,7 +24,7 @@ const GLASS_PURPLE = {
 }
 
 export default function Dashboard() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const [plan, setPlan] = useState(null)
   const [goals, setGoals] = useState([])
@@ -40,6 +40,20 @@ export default function Dashboard() {
     if (hour < 17) return t('dashboard.goodAfternoon')
     return t('dashboard.goodEvening')
   }
+
+  // Translate day names from English abbreviations
+  const translateDay = (dayName) => {
+    const days = {
+      en: { Mon:'Mon', Tue:'Tue', Wed:'Wed', Thu:'Thu', Fri:'Fri', Sat:'Sat', Sun:'Sun' },
+      uz: { Mon:'Du', Tue:'Se', Wed:'Ch', Thu:'Pa', Fri:'Ju', Sat:'Sh', Sun:'Ya' },
+      ru: { Mon:'Пн', Tue:'Вт', Wed:'Ср', Thu:'Чт', Fri:'Пт', Sat:'Сб', Sun:'Вс' },
+    }
+    return days[i18n.language]?.[dayName] || dayName
+  }
+
+  // Hour unit per language
+  const hourUnit = i18n.language === 'uz' ? 's' : i18n.language === 'ru' ? 'ч' : 'h'
+  const minUnit = i18n.language === 'uz' ? 'daq' : i18n.language === 'ru' ? 'мин' : 'min'
 
   useEffect(() => {
     fetchAll()
@@ -112,7 +126,7 @@ export default function Dashboard() {
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#06060d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <BlobBackground />
-      <div style={{ color: '#7c6aff', fontSize: 16, position: 'relative', zIndex: 1 }}>Loading...</div>
+      <div style={{ color: '#7c6aff', fontSize: 16, position: 'relative', zIndex: 1 }}>{t('common.loading')}</div>
     </div>
   )
 
@@ -160,7 +174,7 @@ export default function Dashboard() {
           {[
             { icon: '🔥', value: `${weeklyStats?.summary?.completion_rate || 0}%`, label: t('dashboard.weeklyCompletion'), accent: '#7c6aff' },
             { icon: '🎯', value: goals.length, label: t('dashboard.activeGoals'), accent: '#43e97b' },
-            { icon: '⏱️', value: `${pomodoroStats?.today?.focus_hours || 0}h`, label: t('dashboard.focusTime'), accent: '#ff6b6b' },
+            { icon: '⏱️', value: `${pomodoroStats?.today?.focus_hours || 0}${hourUnit}`, label: t('dashboard.focusTime'), accent: '#ff6b6b' },
             { icon: '✅', value: `${doneTasks}/${totalTasks}`, label: t('dashboard.todayPlan'), accent: '#45aaf2' },
           ].map((stat, i) => (
             <div
@@ -187,7 +201,6 @@ export default function Dashboard() {
 
         {/* AI COACH BANNER */}
         <div style={{ ...GLASS_PURPLE, padding: 20, marginBottom: 24 }}>
-          {/* top shine line */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(124,106,255,0.5), transparent)' }} />
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, position: 'relative', zIndex: 1 }}>
             <div style={{
@@ -200,7 +213,9 @@ export default function Dashboard() {
             <div style={{ flex: 1 }}>
               <h3 style={{ color: '#fff', fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{t('dashboard.aiCoach')}</h3>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.6 }}>
-                {totalTasks === 0 ? t('planner.noTasksAiFeedback') : (aiMessage || t('dashboard.aiCoachDefault', 'Click the button to get personalized AI feedback on your plan!'))}
+                {totalTasks === 0
+                  ? t('planner.noTasksAiFeedback')
+                  : (aiMessage || t('dashboard.aiCoachDefault'))}
               </p>
             </div>
             {totalTasks > 0 && !aiMessage && (
@@ -216,7 +231,7 @@ export default function Dashboard() {
                 onMouseEnter={e => { if (!loadingAi) e.currentTarget.style.background = '#6a58ee' }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#7c6aff' }}
               >
-                {loadingAi ? '🤖 ...' : `🤖 ${t('dashboard.aiGetFeedback')}`}
+                {loadingAi ? `🤖 ...` : `🤖 ${t('dashboard.aiGetFeedback')}`}
               </button>
             )}
             {aiMessage && (
@@ -241,7 +256,7 @@ export default function Dashboard() {
             {totalTasks > 0 && (
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>
-                  <span>{doneTasks} {t('common.of', 'of')} {totalTasks} {t('planner.tasksDone')}</span>
+                  <span>{doneTasks} {t('common.of')} {totalTasks} {t('planner.tasksDone')}</span>
                   <span>{completion}%</span>
                 </div>
                 <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
@@ -277,30 +292,34 @@ export default function Dashboard() {
                         background: task.is_done ? 'linear-gradient(135deg,#43e97b,#26de81)' : 'transparent',
                         border: task.is_done ? 'none' : '1.5px solid rgba(255,255,255,0.2)',
                         boxShadow: task.is_done ? '0 0 12px rgba(67,233,123,0.4)' : 'none',
-                        transition: 'all 0.2s',
-                        color: '#fff', fontSize: 10,
+                        transition: 'all 0.2s', color: '#fff', fontSize: 10,
                       }}>
                         {task.is_done && '✓'}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: task.is_done ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: task.is_done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{
+                          fontSize: 13, fontWeight: 500,
+                          color: task.is_done ? 'rgba(255,255,255,0.3)' : '#fff',
+                          textDecoration: task.is_done ? 'line-through' : 'none',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                        }}>
                           {task.title}
                         </p>
                         <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
                           {task.start_time && `${task.start_time.slice(0, 5)}`}
                           {task.start_time && task.end_time && ` → ${task.end_time.slice(0, 5)}`}
-                          {task.duration_minutes && ` · ${task.duration_minutes} min`}
+                          {task.duration_minutes > 0 && ` · ${task.duration_minutes} ${minUnit}`}
                         </p>
                       </div>
                       <span style={{ background: badge.bg, color: badge.color, fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8, flexShrink: 0 }}>
-                        {task.category}
+                        {t(`goals.categories.${task.category}`) || task.category}
                       </span>
                     </div>
                   )
                 })}
                 {plan.tasks.length > 6 && (
                   <Link to="/planner" style={{ display: 'block', textAlign: 'center', color: '#7c6aff', fontSize: 12, padding: '8px 0', textDecoration: 'none' }}>
-                    +{plan.tasks.length - 6} more tasks →
+                    +{plan.tasks.length - 6} {t('dashboard.moreTasks')}
                   </Link>
                 )}
               </div>
@@ -340,7 +359,11 @@ export default function Dashboard() {
                         </div>
                         {goal.days_remaining !== null && goal.days_remaining !== undefined && (
                           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 6 }}>
-                            {goal.days_remaining > 0 ? `📅 ${goal.days_remaining} days remaining` : goal.days_remaining === 0 ? '⚡ Due today!' : '⚠️ Overdue!'}
+                            {goal.days_remaining > 0
+                              ? `📅 ${goal.days_remaining} ${t('common.daysRemaining')}`
+                              : goal.days_remaining === 0
+                              ? `⚡ ${t('common.dueToday')}`
+                              : `⚠️ ${t('common.overdue')}`}
                           </p>
                         )}
                       </div>
@@ -376,14 +399,16 @@ export default function Dashboard() {
                           transition: 'height 0.7s ease',
                         }} />
                       </div>
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>{day.day_name}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>
+                        {translateDay(day.day_name)}
+                      </span>
                     </div>
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                   {[
                     { label: t('analytics.totalTasks'), value: weeklyStats.summary.total_tasks },
-                    { label: t('analytics.focusHours'), value: `${weeklyStats.summary.total_focus_hours}h` },
+                    { label: t('analytics.focusHours'), value: `${weeklyStats.summary.total_focus_hours}${hourUnit}` },
                     { label: t('analytics.completionRate'), value: `${weeklyStats.summary.completion_rate}%` },
                   ].map((s, i) => (
                     <div key={i}>
@@ -402,9 +427,9 @@ export default function Dashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               {[
                 { to: '/pomodoro', icon: '🍅', label: t('pomodoro.title'), sub: `${pomodoroStats?.today?.sessions || 0} ${t('dashboard.sessionsToday')}`, accent: '#ff6b6b' },
-                { to: '/chat', icon: '💬', label: t('chat.title'), sub: t('dashboard.aiCoach'), accent: '#7c6aff' },
-                { to: '/goals', icon: '🎯', label: t('nav.goals'), sub: `${goals.length} active`, accent: '#43e97b' },
-                { to: '/analytics', icon: '📊', label: t('nav.analytics'), sub: `${weeklyStats?.summary?.completion_rate || 0}% this week`, accent: '#45aaf2' },
+                { to: '/chat', icon: '💬', label: t('chat.title'), sub: t('dashboard.aiCoachSub'), accent: '#7c6aff' },
+                { to: '/goals', icon: '🎯', label: t('nav.goals'), sub: `${goals.length} ${t('dashboard.activeGoalsCount')}`, accent: '#43e97b' },
+                { to: '/analytics', icon: '📊', label: t('nav.analytics'), sub: `${weeklyStats?.summary?.completion_rate || 0}% ${t('dashboard.thisWeek')}`, accent: '#45aaf2' },
               ].map((item, i) => (
                 <Link
                   key={i}
