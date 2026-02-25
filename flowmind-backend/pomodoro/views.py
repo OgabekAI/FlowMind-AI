@@ -273,7 +273,6 @@ class PomodoroStatsView(APIView):
             'settings': PomodoroSettingsSerializer(settings_obj).data,
         })
 
-
 class PomodoroHistoryView(generics.ListAPIView):
     """Get recent pomodoro sessions"""
     serializer_class = PomodoroSessionSerializer

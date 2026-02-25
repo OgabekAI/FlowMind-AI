@@ -19,7 +19,13 @@ export default function AIChat() {
   const fetchHistory = async () => {
     try {
       const res = await api.get('/api/ai/chat/')
-      setMessages(res.data.results || res.data)
+      const all = res.data.results || res.data
+      // Filter out messages before the last clear action
+      const clearedAt = localStorage.getItem('chat_cleared_at')
+      const filtered = clearedAt
+        ? all.filter(m => new Date(m.timestamp) > new Date(clearedAt))
+        : all
+      setMessages(filtered)
     } catch (err) { console.error(err) } finally { setFetching(false) }
   }
 
@@ -39,7 +45,10 @@ export default function AIChat() {
 
   const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
   const formatTime = (ts) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const clearChat = () => setMessages([])
+  const clearChat = () => {
+    localStorage.setItem('chat_cleared_at', new Date().toISOString())
+    setMessages([])
+  }
 
   const suggestedPrompts = [
     t('chat.prompts.focus'), t('chat.prompts.goals'), t('chat.prompts.tip'),
