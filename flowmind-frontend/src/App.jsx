@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import Profile from './pages/Profile'
 
 // Pages
 import Login from './pages/Login'
@@ -50,6 +51,13 @@ function App() {
             <PrivateRoute>
               <AppLayout>
                 <Goals />
+              </AppLayout>
+            </PrivateRoute>
+          } />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <AppLayout>
+                <Profile />
               </AppLayout>
             </PrivateRoute>
           } />

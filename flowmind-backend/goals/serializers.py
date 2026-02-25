@@ -19,6 +19,8 @@ class GoalSerializer(serializers.ModelSerializer):
     milestones = MilestoneSerializer(many=True, read_only=True)
     is_overdue = serializers.BooleanField(read_only=True)
     days_remaining = serializers.IntegerField(read_only=True)
+    deadline = serializers.DateTimeField(required=False, allow_null=True)
+
 
     class Meta:
         model = Goal
@@ -54,11 +56,19 @@ class GoalSerializer(serializers.ModelSerializer):
         return value
 
     def validate_deadline(self, value):
-        if value and value < timezone.now().date():
+        if value is None:
+            return value
+
+        current_deadline = getattr(self.instance, 'deadline', None)
+        if current_deadline and current_deadline == value:
+            return value
+
+        if value <= timezone.now():
             raise serializers.ValidationError(
-                'Deadline cannot be in the past.'
+                'Deadline must be in the future.'
             )
         return value
+
 
 
 class GoalSummarySerializer(serializers.ModelSerializer):

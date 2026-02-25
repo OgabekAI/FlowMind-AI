@@ -63,8 +63,14 @@ class GoalProgressView(APIView):
             )
 
         goal.progress = progress
+
         if progress == 100:
             goal.status = 'completed'
+        elif progress == 0:
+            goal.status = 'active'
+        elif goal.status == 'completed' and progress < 100:
+            goal.status = 'active'
+
         goal.save()
 
         return Response(GoalSerializer(goal).data)

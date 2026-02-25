@@ -1,5 +1,6 @@
 {
   "common": {
+    "profile": "Profil",
     "appName": "FlowMind",
     "tagline": "Muvaffaqiyat sari oqim bilan yuring.",
     "loading": "Yuklanmoqda...",
@@ -123,7 +124,15 @@
     "placeholder": "AI murabbiyingizdan biror narsa so'rang...",
     "send": "Yuborish",
     "thinking": "O'ylamoqda...",
-    "emptyState": "AI murabbiyingiz bilan suhbat boshlang!"
+    "emptyState": "AI murabbiyingiz bilan suhbat boshlang!",
+    "prompts": {
+      "focus": "Bugun nimaga e'tibor qaratishim kerak?",
+      "goals": "Maqsadlarim qanday ketmoqda?",
+      "tip": "Menga samaradorlik bo'yicha maslahat bering",
+      "prioritize": "Vazifalarni ustuvorlashtirshimga yordam bering",
+      "schedule": "Jadvalimni qanday yaxshilashim mumkin?",
+      "motivate": "Meni rag'batlantiring"
+    }
   },
   "analytics": {
     "title": "Tahlil",

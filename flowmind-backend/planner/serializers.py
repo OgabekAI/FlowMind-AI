@@ -17,28 +17,34 @@ class TaskSerializer(serializers.ModelSerializer):
             'category',
             'priority',
             'start_time',
+            'end_time',
             'duration_minutes',
             'is_done',
             'done_at',
             'created_at',
         ]
-        read_only_fields = ['id', 'done_at', 'created_at']
+        read_only_fields = ['id', 'done_at', 'created_at', 'duration_minutes']
 
     def get_goal_title(self, obj):
         if obj.goal:
             return obj.goal.title
         return None
 
-    def validate_duration_minutes(self, value):
-        if value < 5:
-            raise serializers.ValidationError(
-                'Duration must be at least 5 minutes.'
-            )
-        if value > 480:
-            raise serializers.ValidationError(
-                'Duration cannot exceed 8 hours.'
-            )
-        return value
+    def validate(self, attrs):
+        start = attrs.get('start_time')
+        end = attrs.get('end_time')
+        if start and end:
+            from datetime import datetime, date
+            start_dt = datetime.combine(date.today(), start)
+            end_dt = datetime.combine(date.today(), end)
+            if end_dt <= start_dt:
+                raise serializers.ValidationError({
+                    'end_time': 'End time must be after start time.'
+                })
+            # Auto calculate duration
+            diff = end_dt - start_dt
+            attrs['duration_minutes'] = int(diff.total_seconds() / 60)
+        return attrs
 
 
 class DailyPlanSerializer(serializers.ModelSerializer):

@@ -35,7 +35,7 @@ export default function Dashboard() {
         api.get('/api/analytics/weekly/'),
       ])
       setPlan(planRes.data)
-      setGoals(goalsRes.data.slice(0, 3))
+      setGoals((goalsRes.data.results || goalsRes.data).slice(0, 3))
       setPomodoroStats(pomodoroRes.data)
       setWeeklyStats(weeklyRes.data)
     } catch (err) {
@@ -51,7 +51,7 @@ export default function Dashboard() {
       const res = await api.get('/api/ai/plan/feedback/')
       setAiMessage(res.data.feedback)
     } catch {
-      setAiMessage('Add some tasks to your plan first!')
+      setAiMessage('Add some tasks to your plan first to get AI feedback!')
     } finally {
       setLoadingAi(false)
     }
@@ -90,16 +90,23 @@ export default function Dashboard() {
     other: '#aaa',
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="text-[#7c6aff] text-lg">Loading...</div>
-      </div>
-    )
+  const categoryIcons = {
+    study: '📚', fitness: '💪', personal: '⭐',
+    work: '💼', health: '❤️', finance: '💰', other: '🎯'
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="text-[#7c6aff] text-lg">Loading...</div>
+    </div>
+  )
 
   const doneTasks = plan?.tasks?.filter(t => t.is_done).length || 0
   const totalTasks = plan?.tasks?.length || 0
+  const completion = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0
+
+  // Get display name — use username, not email
+  const displayName = user?.username || user?.email?.split('@')[0] || 'there'
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-6 md:p-8">
@@ -108,7 +115,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white">
-            {getGreeting()}, {user?.username} 👋
+            {getGreeting()}, {displayName} 👋
           </h1>
           <p className="text-[#6666aa] text-sm mt-1">
             {doneTasks} {t('dashboard.tasksCompleted')}
@@ -159,16 +166,26 @@ export default function Dashboard() {
           <div className="flex-1">
             <h3 className="text-white font-semibold text-sm mb-1">{t('dashboard.aiCoach')}</h3>
             <p className="text-[#9090c0] text-sm leading-relaxed">
-              {aiMessage || 'Click the button to get personalized AI feedback on your plan!'}
+              {aiMessage || t('dashboard.aiCoachDefault', 'Click the button to get personalized AI feedback on your plan!')}
             </p>
           </div>
-          <button
-            onClick={getAiFeedback}
-            disabled={loadingAi}
-            className="bg-[#7c6aff]/15 hover:bg-[#7c6aff]/25 border border-[#7c6aff]/30 text-[#7c6aff] text-xs font-semibold px-4 py-2 rounded-xl transition-all flex-shrink-0 disabled:opacity-50"
-          >
-            {loadingAi ? '...' : t('dashboard.viewFullPlan')}
-          </button>
+          {!aiMessage && (
+            <button
+              onClick={getAiFeedback}
+              disabled={loadingAi}
+              className="bg-[#7c6aff] hover:bg-[#6a58ee] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all flex-shrink-0 disabled:opacity-50 shadow-lg shadow-[#7c6aff]/25"
+            >
+              {loadingAi ? '🤖 ...' : '🤖 Get Feedback'}
+            </button>
+          )}
+          {aiMessage && (
+            <button
+              onClick={() => setAiMessage('')}
+              className="text-[#6666aa] hover:text-white text-xs flex-shrink-0 transition-all"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
@@ -180,7 +197,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-white font-bold text-lg">{t('dashboard.todayPlan')}</h2>
             <Link to="/planner" className="text-[#7c6aff] text-xs hover:underline">
-              {t('dashboard.viewFullPlan')}
+              Open Planner →
             </Link>
           </div>
 
@@ -189,18 +206,18 @@ export default function Dashboard() {
             <div className="mb-4">
               <div className="flex justify-between text-xs text-[#6666aa] mb-1.5">
                 <span>{doneTasks} of {totalTasks} done</span>
-                <span>{plan?.completion_rate || 0}%</span>
+                <span>{completion}%</span>
               </div>
               <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#7c6aff] rounded-full transition-all duration-500"
-                  style={{ width: `${plan?.completion_rate || 0}%` }}
+                  style={{ width: `${completion}%` }}
                 />
               </div>
             </div>
           )}
 
-          {plan?.tasks?.length === 0 ? (
+          {!plan?.tasks?.length ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-3">📋</div>
               <p className="text-[#6666aa] text-sm">{t('dashboard.noTasksToday')}</p>
@@ -213,7 +230,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-2">
-              {plan?.tasks?.slice(0, 6).map(task => (
+              {plan.tasks.slice(0, 6).map(task => (
                 <div
                   key={task.id}
                   onClick={() => toggleTask(task.id)}
@@ -231,7 +248,9 @@ export default function Dashboard() {
                       {task.title}
                     </p>
                     <p className="text-xs text-[#6666aa] mt-0.5">
-                      {task.start_time && `${task.start_time.slice(0,5)} · `}{task.duration_minutes} min
+                      {task.start_time && `${task.start_time.slice(0, 5)}`}
+                      {task.start_time && task.end_time && ` → ${task.end_time.slice(0, 5)}`}
+                      {task.duration_minutes && ` · ${task.duration_minutes} min`}
                     </p>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-lg flex-shrink-0 ${categoryColors[task.category] || categoryColors.other}`}>
@@ -239,6 +258,11 @@ export default function Dashboard() {
                   </span>
                 </div>
               ))}
+              {plan.tasks.length > 6 && (
+                <Link to="/planner" className="block text-center text-[#7c6aff] text-xs py-2 hover:underline">
+                  +{plan.tasks.length - 6} more tasks →
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -248,7 +272,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-white font-bold text-lg">{t('dashboard.activeGoals')}</h2>
             <Link to="/goals" className="text-[#7c6aff] text-xs hover:underline">
-              {t('dashboard.viewFullPlan')}
+              Open Goals →
             </Link>
           </div>
 
@@ -270,17 +294,13 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-base">
-                        {goal.category === 'study' ? '📚' :
-                         goal.category === 'fitness' ? '💪' :
-                         goal.category === 'work' ? '💼' :
-                         goal.category === 'health' ? '❤️' :
-                         goal.category === 'finance' ? '💰' : '🎯'}
+                        {categoryIcons[goal.category] || '🎯'}
                       </span>
-                      <span className="text-white text-sm font-medium truncate max-w-[160px]">
+                      <span className="text-white text-sm font-medium truncate max-w-[180px]">
                         {goal.title}
                       </span>
                     </div>
-                    <span className="text-sm font-bold" style={{ color: goalColors[goal.category] }}>
+                    <span className="text-sm font-bold" style={{ color: goalColors[goal.category] || '#aaa' }}>
                       {goal.progress}%
                     </span>
                   </div>
@@ -289,17 +309,17 @@ export default function Dashboard() {
                       className="h-full rounded-full transition-all duration-700"
                       style={{
                         width: `${goal.progress}%`,
-                        background: goalColors[goal.category]
+                        background: goalColors[goal.category] || '#aaa'
                       }}
                     />
                   </div>
-                  {goal.days_remaining !== null && (
+                  {goal.days_remaining !== null && goal.days_remaining !== undefined && (
                     <p className="text-xs text-[#6666aa] mt-1">
                       {goal.days_remaining > 0
-                        ? `${goal.days_remaining} days remaining`
+                        ? `📅 ${goal.days_remaining} days remaining`
                         : goal.days_remaining === 0
-                        ? 'Due today!'
-                        : 'Overdue!'}
+                        ? '⚡ Due today!'
+                        : '⚠️ Overdue!'}
                     </p>
                   )}
                 </div>
@@ -311,43 +331,51 @@ export default function Dashboard() {
         {/* WEEKLY CHART */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
           <h2 className="text-white font-bold text-lg mb-5">{t('analytics.weeklyStats')}</h2>
-          <div className="flex items-end gap-2 h-24">
-            {weeklyStats?.days?.map((day, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full bg-white/5 rounded-t-lg relative" style={{ height: '80px' }}>
-                  <div
-                    className="absolute bottom-0 left-0 right-0 bg-[#7c6aff] rounded-t-lg transition-all duration-700"
-                    style={{ height: `${day.completion_rate}%` }}
-                  />
-                </div>
-                <span className="text-[#6666aa] text-xs">{day.day_name}</span>
+          {!weeklyStats?.days?.length ? (
+            <div className="text-center py-8 text-[#6666aa] text-sm">
+              Complete some tasks to see your weekly chart!
+            </div>
+          ) : (
+            <>
+              <div className="flex items-end gap-2" style={{ height: '100px' }}>
+                {weeklyStats.days.map((day, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                    <div className="w-full relative rounded-t-lg overflow-hidden bg-white/5" style={{ height: '80px' }}>
+                      <div
+                        className="absolute bottom-0 left-0 right-0 bg-[#7c6aff] rounded-t-lg transition-all duration-700"
+                        style={{ height: `${day.completion_rate}%` }}
+                      />
+                    </div>
+                    <span className="text-[#6666aa] text-xs">{day.day_name}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-4 pt-4 border-t border-white/5">
-            <div>
-              <div className="text-[#6666aa] text-xs">{t('analytics.totalTasks')}</div>
-              <div className="text-white font-bold">{weeklyStats?.summary?.total_tasks || 0}</div>
-            </div>
-            <div>
-              <div className="text-[#6666aa] text-xs">{t('analytics.focusHours')}</div>
-              <div className="text-white font-bold">{weeklyStats?.summary?.total_focus_hours || 0}h</div>
-            </div>
-            <div>
-              <div className="text-[#6666aa] text-xs">{t('analytics.completionRate')}</div>
-              <div className="text-white font-bold">{weeklyStats?.summary?.completion_rate || 0}%</div>
-            </div>
-          </div>
+              <div className="flex justify-between mt-4 pt-4 border-t border-white/5">
+                <div>
+                  <div className="text-[#6666aa] text-xs">{t('analytics.totalTasks')}</div>
+                  <div className="text-white font-bold">{weeklyStats.summary.total_tasks}</div>
+                </div>
+                <div>
+                  <div className="text-[#6666aa] text-xs">{t('analytics.focusHours')}</div>
+                  <div className="text-white font-bold">{weeklyStats.summary.total_focus_hours}h</div>
+                </div>
+                <div>
+                  <div className="text-[#6666aa] text-xs">{t('analytics.completionRate')}</div>
+                  <div className="text-white font-bold">{weeklyStats.summary.completion_rate}%</div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* QUICK LINKS */}
+        {/* QUICK ACCESS */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
           <h2 className="text-white font-bold text-lg mb-5">Quick Access</h2>
           <div className="grid grid-cols-2 gap-3">
             <Link to="/pomodoro" className="flex flex-col items-center gap-2 p-4 bg-[#ff6b6b]/10 border border-[#ff6b6b]/20 rounded-xl hover:bg-[#ff6b6b]/15 transition-all">
               <span className="text-2xl">🍅</span>
               <span className="text-white text-sm font-medium">{t('pomodoro.title')}</span>
-              <span className="text-[#6666aa] text-xs">{pomodoroStats?.today?.sessions || 0} today</span>
+              <span className="text-[#6666aa] text-xs">{pomodoroStats?.today?.sessions || 0} sessions today</span>
             </Link>
             <Link to="/chat" className="flex flex-col items-center gap-2 p-4 bg-[#7c6aff]/10 border border-[#7c6aff]/20 rounded-xl hover:bg-[#7c6aff]/15 transition-all">
               <span className="text-2xl">💬</span>
@@ -362,7 +390,7 @@ export default function Dashboard() {
             <Link to="/analytics" className="flex flex-col items-center gap-2 p-4 bg-[#45aaf2]/10 border border-[#45aaf2]/20 rounded-xl hover:bg-[#45aaf2]/15 transition-all">
               <span className="text-2xl">📊</span>
               <span className="text-white text-sm font-medium">{t('nav.analytics')}</span>
-              <span className="text-[#6666aa] text-xs">View stats</span>
+              <span className="text-[#6666aa] text-xs">{weeklyStats?.summary?.completion_rate || 0}% this week</span>
             </Link>
           </div>
         </div>

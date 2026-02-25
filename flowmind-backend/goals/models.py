@@ -37,7 +37,7 @@ class Goal(models.Model):
         default='active'
     )
     progress = models.PositiveIntegerField(default=0)  # 0-100
-    deadline = models.DateField(null=True, blank=True)
+    deadline = models.DateTimeField(null=True, blank=True)
     ai_feedback = models.TextField(blank=True)
     ai_feedback_updated = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -54,14 +54,14 @@ class Goal(models.Model):
     def is_overdue(self):
         from django.utils import timezone
         if self.deadline and self.status == 'active':
-            return self.deadline < timezone.now().date()
+            return self.deadline < timezone.now()
         return False
 
     @property
     def days_remaining(self):
         from django.utils import timezone
         if self.deadline:
-            delta = self.deadline - timezone.now().date()
+            delta = self.deadline - timezone.now()
             return delta.days
         return None
 

@@ -1,17 +1,19 @@
+import requests
 from django.utils import timezone
 from django.core.cache import cache
+from django.conf import settings
 from .groq_client import groq
 from .prompts import (
     get_daily_plan_feedback_prompt,
     get_goal_feedback_prompt,
-    get_chat_prompt,
+    get_chat_system_prompt,
     get_weekly_summary_prompt,
 )
 
 
 def generate_plan_feedback(user, plan):
     """Generate AI feedback for a daily plan"""
-    cache_key = f'plan_feedback_{plan.id}'
+    cache_key = f'plan_feedback_{plan.id}_{plan.completion_rate}'
     cached = cache.get(cache_key)
     if cached:
         return cached
@@ -57,9 +59,10 @@ def generate_goal_feedback(user, goal):
 
 
 def generate_chat_response(user, message):
-    """Generate AI chat response with user context"""
+    """Generate AI chat response with full conversation history"""
     from goals.models import Goal
     from planner.models import DailyPlan
+    from .models import ChatMessage
 
     # Get user context
     recent_goals = Goal.objects.filter(
@@ -69,17 +72,79 @@ def generate_chat_response(user, message):
 
     today = timezone.now().date()
     try:
-        today_plan = DailyPlan.objects.get(
+        today_tasks = DailyPlan.objects.get(
             user=user,
             date=today
         ).tasks.all()
     except DailyPlan.DoesNotExist:
-        today_plan = []
+        today_tasks = []
 
-    prompt = get_chat_prompt(user, message, recent_goals, today_plan)
-    response = groq.chat(prompt, temperature=0.8, max_tokens=400)
+    goals_text = "\n".join([
+        f"- {g.title} ({g.progress}% complete, {g.category})"
+        for g in recent_goals
+    ]) or "No active goals."
 
-    return response
+    tasks_text = "\n".join([
+        f"- {t.title} ({t.category}, done: {t.is_done})"
+        for t in today_tasks
+    ]) or "No tasks for today."
+
+    # Get last 10 messages for conversation history
+    history = ChatMessage.objects.filter(
+        user=user
+    ).order_by('-timestamp')[:10]
+    history = list(reversed(history))
+
+    # Build messages array
+    messages = [
+        {
+            "role": "system",
+            "content": get_chat_system_prompt(user, goals_text, tasks_text)
+        }
+    ]
+
+    # Add conversation history
+    for msg in history:
+        messages.append({
+            "role": msg.role,
+            "content": msg.content
+        })
+
+    # Add current message
+    messages.append({
+        "role": "user",
+        "content": message
+    })
+
+    # Call Groq API with full conversation
+    headers = {
+        "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "model": settings.GROQ_MODEL,
+        "messages": messages,
+        "temperature": 0.7,
+        "max_tokens": 400,
+    }
+
+    try:
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data['choices'][0]['message']['content'].strip()
+    except requests.exceptions.Timeout:
+        return "Response timed out. Please try again."
+    except requests.exceptions.HTTPError as e:
+        return f"AI service error ({response.status_code}). Please try again."
+    except Exception:
+        return "Something went wrong. Please try again."
 
 
 def generate_weekly_summary(user, stats):

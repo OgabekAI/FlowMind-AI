@@ -97,7 +97,6 @@ class TaskToggleDoneView(APIView):
         task.done_at = timezone.now() if task.is_done else None
         task.save()
 
-        # Update linked goal progress automatically
         if task.goal:
             goal = task.goal
             total_tasks = goal.tasks.count()
@@ -106,7 +105,14 @@ class TaskToggleDoneView(APIView):
                 goal.progress = int((done_tasks / total_tasks) * 100)
                 if goal.progress == 100:
                     goal.status = 'completed'
+                elif goal.progress == 0:
+                    goal.status = 'active'
+                elif goal.status == 'completed' and goal.progress < 100:
+                    goal.status = 'active'
                 goal.save()
+
+        from analytics.services import update_daily_stats
+        update_daily_stats(request.user, task.plan.date)
 
         return Response(TaskSerializer(task).data)
 

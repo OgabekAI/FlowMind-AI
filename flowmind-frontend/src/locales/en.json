@@ -1,5 +1,6 @@
 {
   "common": {
+    "profile": "Profile",
     "appName": "FlowMind",
     "tagline": "Get in the flow. Master your mind.",
     "loading": "Loading...",
@@ -118,13 +119,6 @@
     "longBreakMinutes": "Long Break Minutes",
     "sessionsBeforeLongBreak": "Sessions Before Long Break"
   },
-  "chat": {
-    "title": "AI Chat",
-    "placeholder": "Ask your AI coach anything...",
-    "send": "Send",
-    "thinking": "Thinking...",
-    "emptyState": "Start a conversation with your AI coach!"
-  },
   "analytics": {
     "title": "Analytics",
     "weeklyStats": "This Week",
@@ -135,5 +129,20 @@
     "bestDay": "Best Day",
     "weeklySummary": "AI Weekly Summary",
     "getAiSummary": "Get AI Summary"
+  },
+  "chat": {
+    "title": "AI Chat",
+    "placeholder": "Ask your AI coach anything...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "emptyState": "Start a conversation with your AI coach!",
+    "prompts": {
+      "focus": "What should I focus on today?",
+      "goals": "How am I doing with my goals?",
+      "tip": "Give me a productivity tip",
+      "prioritize": "Help me prioritize my tasks",
+      "schedule": "How can I improve my schedule?",
+      "motivate": "Motivate me to stay on track"
+    }
   }
 }

@@ -76,6 +76,7 @@ class Task(models.Model):
         default='medium'
     )
     start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(default=30)
     is_done = models.BooleanField(default=False)
     done_at = models.DateTimeField(null=True, blank=True)
