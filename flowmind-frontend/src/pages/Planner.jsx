@@ -244,7 +244,7 @@ export default function Planner() {
       const res = await api.get('/api/ai/plan/feedback/')
       setAiFeedback(res.data.feedback)
     } catch {
-      setAiFeedback('Add some tasks first to get AI feedback!')
+      setAiFeedback(t('planner.noTasksAiFeedback'))
     } finally {
       setLoadingAi(false)
     }

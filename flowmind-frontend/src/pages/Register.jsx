@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 const TIMEZONES = [
   'UTC',
@@ -25,6 +27,7 @@ const TIMEZONES = [
 export default function Register() {
   const { register } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     email: '',
     username: '',
@@ -45,7 +48,7 @@ export default function Register() {
     setError('')
 
     if (form.password !== form.password2) {
-      setError('Passwords do not match.')
+      setError(t('auth.passwordMismatch'))
       return
     }
 
@@ -71,6 +74,11 @@ export default function Register() {
       {/* Background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#7c6aff] opacity-10 blur-[120px] rounded-full pointer-events-none" />
 
+      {/* Language switcher top right */}
+      <div className="absolute top-6 right-6">
+        <LanguageSwitcher />
+      </div>
+
       <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -80,12 +88,12 @@ export default function Register() {
           <h1 className="text-3xl font-bold text-white">
             Flow<span className="text-[#7c6aff]">Mind</span>
           </h1>
-          <p className="text-[#6666aa] mt-1 text-sm">Get in the flow. Master your mind.</p>
+          <p className="text-[#6666aa] mt-1 text-sm">{t('common.tagline')}</p>
         </div>
 
         {/* Card */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-8">
-          <h2 className="text-xl font-bold text-white mb-6">Create your account</h2>
+          <h2 className="text-xl font-bold text-white mb-6">{t('auth.createAccount')}</h2>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 mb-5 text-sm">
@@ -95,7 +103,7 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Email</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('auth.email')}</label>
               <input
                 type="email"
                 name="email"
@@ -108,7 +116,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Username</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('auth.username')}</label>
               <input
                 type="text"
                 name="username"
@@ -122,34 +130,20 @@ export default function Register() {
 
             <div>
               <label className="text-sm text-[#6666aa] mb-1.5 block">
-                Occupation <span className="text-[#444466]">(optional)</span>
+                {t('auth.occupation')} <span className="text-[#444466]">({t('auth.optional')})</span>
               </label>
               <input
                 type="text"
                 name="occupation"
                 value={form.occupation}
                 onChange={handleChange}
-                placeholder="Student, Developer, Designer..."
+                placeholder={t('auth.occupationPlaceholder')}
                 className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#444466] focus:outline-none focus:border-[#7c6aff] transition-colors"
               />
             </div>
 
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Timezone</label>
-              <select
-                name="timezone"
-                value={form.timezone}
-                onChange={handleChange}
-                className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7c6aff] transition-colors"
-              >
-                {TIMEZONES.map(tz => (
-                  <option key={tz} value={tz}>{tz}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Password</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('auth.password')}</label>
               <input
                 type="password"
                 name="password"
@@ -162,7 +156,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Confirm Password</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('auth.confirmPassword')}</label>
               <input
                 type="password"
                 name="password2"
@@ -179,14 +173,14 @@ export default function Register() {
               disabled={loading}
               className="w-full bg-[#7c6aff] hover:bg-[#6a58ee] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-3 transition-all duration-200 shadow-lg shadow-[#7c6aff]/25 mt-2"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
             </button>
           </form>
 
           <p className="text-center text-sm text-[#6666aa] mt-6">
-            Already have an account?{' '}
+            {t('auth.haveAccount')}{' '}
             <Link to="/login" className="text-[#7c6aff] hover:underline font-medium">
-              Sign in
+              {t('auth.signInLink')}
             </Link>
           </p>
         </div>

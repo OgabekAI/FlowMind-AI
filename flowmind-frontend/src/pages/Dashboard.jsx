@@ -51,7 +51,7 @@ export default function Dashboard() {
       const res = await api.get('/api/ai/plan/feedback/')
       setAiMessage(res.data.feedback)
     } catch {
-      setAiMessage('Add some tasks to your plan first to get AI feedback!')
+      setAiMessage(t('planner.noTasksAiFeedback'))
     } finally {
       setLoadingAi(false)
     }
@@ -166,10 +166,10 @@ export default function Dashboard() {
           <div className="flex-1">
             <h3 className="text-white font-semibold text-sm mb-1">{t('dashboard.aiCoach')}</h3>
             <p className="text-[#9090c0] text-sm leading-relaxed">
-              {aiMessage || t('dashboard.aiCoachDefault', 'Click the button to get personalized AI feedback on your plan!')}
+              {totalTasks === 0 ? t('planner.noTasksAiFeedback') : (aiMessage || t('dashboard.aiCoachDefault', 'Click the button to get personalized AI feedback on your plan!'))}
             </p>
           </div>
-          {!aiMessage && (
+          {totalTasks > 0 && !aiMessage && (
             <button
               onClick={getAiFeedback}
               disabled={loadingAi}
@@ -237,8 +237,8 @@ export default function Dashboard() {
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-all group"
                 >
                   <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.is_done
-                      ? 'bg-[#43e97b] border-[#43e97b]'
-                      : 'border-white/20 group-hover:border-[#7c6aff]'
+                    ? 'bg-[#43e97b] border-[#43e97b]'
+                    : 'border-white/20 group-hover:border-[#7c6aff]'
                     }`}>
                     {task.is_done && <span className="text-white text-xs">✓</span>}
                   </div>

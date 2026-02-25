@@ -74,7 +74,8 @@
     "todayView": "Today",
     "noTasksDay": "No tasks",
     "addTaskDay": "Add task",
-    "endTimeError": "End time must be after start time"
+    "endTimeError": "End time must be after start time",
+    "noTasksAiFeedback": "Add some tasks to your plan first to get AI feedback!"
   },
   "pomodoro": {
     "title": "Pomodoro Timer",

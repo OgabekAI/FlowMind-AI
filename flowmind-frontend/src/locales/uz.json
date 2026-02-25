@@ -124,7 +124,8 @@
     "todayView": "Bugun",
     "noTasksDay": "Vazifalar yo'q",
     "addTaskDay": "Vazifa qo'shish",
-    "endTimeError": "Tugash vaqti boshlanish vaqtidan kech bo'lishi kerak"
+    "endTimeError": "Tugash vaqti boshlanish vaqtidan kech bo'lishi kerak",
+    "noTasksAiFeedback": "AI fikrini olish uchun avval rejangizga vazifalar qo'shing!"
   },
   "pomodoro": {
     "title": "Pomodoro taymer",
