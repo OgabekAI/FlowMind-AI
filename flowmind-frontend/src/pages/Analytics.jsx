@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import api from '../api/axios'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -62,7 +63,18 @@ export default function Analytics() {
   }
 
   const stats = activeTab === 'weekly' ? weeklyStats : monthlyStats
-  const chartData = stats?.days || []
+
+  // Translate day names coming from the backend (always English abbreviations)
+  const translateDayName = (dayName) => {
+    const key = `days.${dayName}`
+    const translated = i18n.t(key)
+    return translated === key ? dayName : translated  // fallback to original if key missing
+  }
+
+  const chartData = (stats?.days || []).map(day => ({
+    ...day,
+    day_name: translateDayName(day.day_name),
+  }))
 
   if (loading) return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
@@ -77,28 +89,26 @@ export default function Analytics() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white">{t('analytics.title')}</h1>
-          <p className="text-[#6666aa] text-sm mt-1">Track your productivity over time</p>
+          <p className="text-[#6666aa] text-sm mt-1">{t('analytics.trackDesc')}</p>
         </div>
 
         {/* TAB SWITCHER */}
         <div className="bg-[#12121a] border border-white/10 rounded-xl p-1 flex gap-1">
           <button
             onClick={() => setActiveTab('weekly')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'weekly'
-                ? 'bg-[#7c6aff] text-white'
-                : 'text-[#6666aa] hover:text-white'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'weekly'
+              ? 'bg-[#7c6aff] text-white'
+              : 'text-[#6666aa] hover:text-white'
+              }`}
           >
             {t('analytics.weeklyStats')}
           </button>
           <button
             onClick={() => setActiveTab('monthly')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'monthly'
-                ? 'bg-[#7c6aff] text-white'
-                : 'text-[#6666aa] hover:text-white'
-            }`}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'monthly'
+              ? 'bg-[#7c6aff] text-white'
+              : 'text-[#6666aa] hover:text-white'
+              }`}
           >
             {t('analytics.monthlyStats')}
           </button>
@@ -112,8 +122,8 @@ export default function Analytics() {
           <div className="text-2xl font-bold text-white">
             {stats?.summary?.completed_tasks || 0}
           </div>
-          <div className="text-[#6666aa] text-xs mt-1">Tasks Completed</div>
-          <div className="text-[#444466] text-xs">of {stats?.summary?.total_tasks || 0} total</div>
+          <div className="text-[#6666aa] text-xs mt-1">{t('analytics.completionRate')}</div>
+          <div className="text-[#444466] text-xs">{t('common.of', 'of')} {stats?.summary?.total_tasks || 0} {t('analytics.totalTasks').toLowerCase()}</div>
         </div>
 
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
@@ -122,15 +132,14 @@ export default function Analytics() {
             {stats?.summary?.completion_rate || 0}%
           </div>
           <div className="text-[#6666aa] text-xs mt-1">{t('analytics.completionRate')}</div>
-          <div className={`text-xs mt-1 font-medium ${
-            (stats?.summary?.completion_rate || 0) >= 70
-              ? 'text-[#43e97b]'
-              : (stats?.summary?.completion_rate || 0) >= 40
+          <div className={`text-xs mt-1 font-medium ${(stats?.summary?.completion_rate || 0) >= 70
+            ? 'text-[#43e97b]'
+            : (stats?.summary?.completion_rate || 0) >= 40
               ? 'text-[#f7b731]'
               : 'text-red-400'
-          }`}>
-            {(stats?.summary?.completion_rate || 0) >= 70 ? '🌟 Excellent!' :
-             (stats?.summary?.completion_rate || 0) >= 40 ? '👍 Good' : '💪 Keep going!'}
+            }`}>
+            {(stats?.summary?.completion_rate || 0) >= 70 ? t('analytics.excellent') :
+              (stats?.summary?.completion_rate || 0) >= 40 ? t('analytics.good') : t('analytics.keepGoing')}
           </div>
         </div>
 
@@ -145,7 +154,7 @@ export default function Analytics() {
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
           <div className="text-2xl mb-2">⭐</div>
           <div className="text-2xl font-bold text-white truncate">
-            {stats?.summary?.best_day || '—'}
+            {stats?.summary?.best_day ? translateDayName(stats.summary.best_day) : '—'}
           </div>
           <div className="text-[#6666aa] text-xs mt-1">{t('analytics.bestDay')}</div>
         </div>
@@ -159,7 +168,7 @@ export default function Analytics() {
           <h3 className="text-white font-bold mb-5">{t('analytics.completionRate')}</h3>
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              No data yet
+              {t('analytics.noData')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
@@ -199,10 +208,10 @@ export default function Analytics() {
 
         {/* TASKS BAR CHART */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-5">Tasks Overview</h3>
+          <h3 className="text-white font-bold mb-5">{t('analytics.tasksOverview')}</h3>
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              No data yet
+              {t('analytics.noData')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
@@ -232,7 +241,7 @@ export default function Analytics() {
           <h3 className="text-white font-bold mb-5">{t('analytics.focusHours')}</h3>
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              No data yet
+              {t('analytics.noData')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
@@ -271,10 +280,10 @@ export default function Analytics() {
 
         {/* DAILY BREAKDOWN */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-5">Daily Breakdown</h3>
+          <h3 className="text-white font-bold mb-5">{t('analytics.dailyBreakdown')}</h3>
           {chartData.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              No data yet
+              {t('analytics.noData')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -289,8 +298,8 @@ export default function Analytics() {
                         background: day.completion_rate >= 70
                           ? '#43e97b'
                           : day.completion_rate >= 40
-                          ? '#f7b731'
-                          : '#7c6aff'
+                            ? '#f7b731'
+                            : '#7c6aff'
                       }}
                     />
                   </div>
@@ -298,7 +307,7 @@ export default function Analytics() {
                     {day.completion_rate}%
                   </span>
                   <span className="text-[#6666aa] text-xs w-14 text-right flex-shrink-0">
-                    {day.completed_tasks}/{day.total_tasks} tasks
+                    {day.completed_tasks}/{day.total_tasks} {t('analytics.totalTasks').toLowerCase()}
                   </span>
                 </div>
               ))}
@@ -330,7 +339,7 @@ export default function Analytics() {
               onClick={() => setAiSummary('')}
               className="text-[#6666aa] hover:text-white text-xs transition-all"
             >
-              Refresh
+              {t('analytics.refresh', 'Refresh')}
             </button>
           )}
         </div>
@@ -339,7 +348,7 @@ export default function Analytics() {
           <p className="text-[#9090c0] text-sm leading-relaxed">{aiSummary}</p>
         ) : (
           <p className="text-[#6666aa] text-sm">
-            Click the button above to get a personalized AI analysis of your productivity this week.
+            {t('analytics.aiSummaryHint')}
           </p>
         )}
       </div>

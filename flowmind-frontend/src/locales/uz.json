@@ -1,6 +1,5 @@
 {
   "common": {
-    "profile": "Profil",
     "appName": "FlowMind",
     "tagline": "Muvaffaqiyat sari oqim bilan yuring.",
     "loading": "Yuklanmoqda...",
@@ -14,7 +13,11 @@
     "next": "Keyingi",
     "comingSoon": "Tez kunda...",
     "logout": "Chiqish",
-    "settings": "Sozlamalar"
+    "settings": "Sozlamalar",
+    "optional": "ixtiyoriy",
+    "title": "Sarlavha",
+    "of": "dan",
+    "total": "jami"
   },
   "nav": {
     "dashboard": "Bosh sahifa",
@@ -22,7 +25,8 @@
     "goals": "Maqsadlar",
     "pomodoro": "Pomodoro",
     "aiChat": "AI Chat",
-    "analytics": "Tahlil"
+    "analytics": "Tahlil",
+    "profile": "Profil"
   },
   "auth": {
     "welcomeBack": "Xush kelibsiz",
@@ -54,16 +58,24 @@
     "focusTime": "Diqqat vaqti",
     "streak": "Kunlik seriya",
     "aiCoach": "AI murabbiyingiz xabar yubordi",
+    "aiCoachDefault": "Rejangiz haqida AI fikrlarini olish uchun tugmani bosing!",
+    "aiGetFeedback": "Fikr olish",
     "viewFullPlan": "To'liq rejani ko'rish →",
+    "openPlanner": "Rejalashtiruvchini ochish →",
+    "openGoals": "Maqsadlarni ochish →",
     "tasksCompleted": "vazifa bajarildi bugun",
     "weeklyCompletion": "Haftalik bajarilish",
     "noTasksToday": "Bugun hali vazifalar yo'q",
-    "addFirstTask": "Birinchi vazifani qo'shing"
+    "addFirstTask": "Birinchi vazifani qo'shing",
+    "quickAccess": "Tezkor kirish",
+    "sessionsToday": "sessiya bugun"
   },
   "goals": {
     "title": "Maqsadlarim",
     "addGoal": "Maqsad qo'shish",
     "noGoals": "Hali maqsadlar yo'q",
+    "noGoalsDesc": "Birinchi maqsadingizni qo'ying va natijalarni kuzating",
+    "description": "Tavsif",
     "progress": "Jarayon",
     "deadline": "Muddat",
     "milestones": "Bosqichlar",
@@ -77,6 +89,7 @@
       "work": "Ish",
       "finance": "Moliya",
       "health": "Sog'liq",
+      "break": "Dam olish",
       "other": "Boshqa"
     },
     "status": {
@@ -90,29 +103,48 @@
     "title": "Kunlik rejalashtirish",
     "addTask": "Vazifa qo'shish",
     "noTasks": "Bugun vazifalar yo'q",
+    "noTasksDesc": "Quyida vazifalar qo'shib kuningizni rejalashtiring",
     "startTime": "Boshlanish vaqti",
+    "endTime": "Tugash vaqti",
     "duration": "Davomiyligi",
     "category": "Toifa",
     "priority": "Muhimlik",
+    "linkGoal": "Maqsadga bog'lash",
+    "noGoal": "Maqsadsiz",
     "getAiFeedback": "AI rejamni baholash",
+    "dismiss": "Yopish",
+    "tasksDone": "vazifa bajarildi",
+    "today": "bugun",
     "priorities": {
       "low": "Past",
       "medium": "O'rta",
       "high": "Yuqori"
-    }
+    },
+    "weeklyView": "Bu hafta",
+    "todayView": "Bugun",
+    "noTasksDay": "Vazifalar yo'q",
+    "addTaskDay": "Vazifa qo'shish",
+    "endTimeError": "Tugash vaqti boshlanish vaqtidan kech bo'lishi kerak"
   },
   "pomodoro": {
     "title": "Pomodoro taymer",
     "focusSession": "Diqqat sessiyasi",
     "shortBreak": "Qisqa tanaffus",
     "longBreak": "Uzun tanaffus",
-    "start": "Boshlash",
-    "pause": "To'xtatish",
+    "start": "Start",
+    "pause": "Stop",
     "resume": "Davom ettirish",
     "cancel": "Bekor qilish",
     "reset": "Qayta o'rnatish",
     "sessionsToday": "Bugungi sessiyalar",
     "focusHours": "Diqqat soatlari",
+    "allTimeSessions": "Jami sessiyalar",
+    "recentSessions": "So'nggi sessiyalar",
+    "noSessions": "Hali sessiyalar yo'q",
+    "untilLongBreak": "uzun tanaffusgacha",
+    "attachTask": "Vazifa biriktirish",
+    "attachTaskDesc": "Sessiya davomida bajaradigan vazifani tanlang",
+    "noTaskFocus": "Vazifasiz — erkin diqqat",
     "settings": "Taymer sozlamalari",
     "focusMinutes": "Diqqat daqiqalari",
     "shortBreakMinutes": "Qisqa tanaffus daqiqalari",
@@ -125,6 +157,10 @@
     "send": "Yuborish",
     "thinking": "O'ylamoqda...",
     "emptyState": "AI murabbiyingiz bilan suhbat boshlang!",
+    "poweredBy": "Llama 4 · Doim yordam berishga tayyor",
+    "online": "Onlayn",
+    "clear": "Tozalash",
+    "enterToSend": "Yuborish uchun Enter · Yangi qator uchun Shift+Enter",
     "prompts": {
       "focus": "Bugun nimaga e'tibor qaratishim kerak?",
       "goals": "Maqsadlarim qanday ketmoqda?",
@@ -143,6 +179,78 @@
     "totalTasks": "Jami vazifalar",
     "bestDay": "Eng yaxshi kun",
     "weeklySummary": "AI haftalik xulosa",
-    "getAiSummary": "AI xulosasini olish"
+    "getAiSummary": "AI xulosasini olish",
+    "trackDesc": "Vaqt o'tishi bilan samaradorligingizni kuzating",
+    "tasksOverview": "Vazifalar ko'rinishi",
+    "dailyBreakdown": "Kunlik tahlil",
+    "noData": "Hali ma'lumot yo'q",
+    "completeTasksHint": "Haftalik grafikni ko'rish uchun vazifalarni bajaring!",
+    "aiSummaryHint": "Bu hafta samaradorligingizning shaxsiylashtirilgan AI tahlilini olish uchun tugmani bosing.",
+    "excellent": "🌟 Ajoyib!",
+    "good": "👍 Yaxshi",
+    "keepGoing": "💪 Davom eting!",
+    "refresh": "Yangilash"
+  },
+  "profile": {
+    "title": "Profil va sozlamalar",
+    "subtitle": "Hisob ma'lumotlaringizni boshqaring",
+    "editProfile": "Profilni tahrirlash",
+    "changePassword": "Parolni o'zgartirish",
+    "appInfo": "Ilova haqida",
+    "version": "Versiya",
+    "aiModel": "AI modeli",
+    "languages": "Tillar",
+    "username": "Foydalanuvchi nomi",
+    "occupation": "Kasb",
+    "bio": "Bio",
+    "bioPlaceholder": "O'zingiz haqingizda bir oz yozing...",
+    "saveProfile": "Profilni saqlash",
+    "saving": "Saqlanmoqda...",
+    "currentPassword": "Joriy parol",
+    "newPassword": "Yangi parol",
+    "confirmNewPassword": "Yangi parolni tasdiqlang",
+    "changePasswordBtn": "Parolni o'zgartirish",
+    "changing": "O'zgartirilmoqda...",
+    "profileUpdated": "Profil muvaffaqiyatli yangilandi!",
+    "passwordChanged": "Parol muvaffaqiyatli o'zgartirildi!",
+    "noOccupation": "Kasb ko'rsatilmagan"
+  },
+  "delete": {
+    "goalTitle": "Maqsadni o'chirish?",
+    "goalDesc": "Bu maqsad va uning barcha bosqichlari butunlay o'chiriladi. Bu amalni qaytarib bo'lmaydi.",
+    "taskTitle": "Vazifani o'chirish?",
+    "taskDesc": "Bu vazifa butunlay o'chiriladi."
+  },
+  "days": {
+    "Mon": "Dush",
+    "Tue": "Sesh",
+    "Wed": "Chor",
+    "Thu": "Pay",
+    "Fri": "Jum",
+    "Sat": "Shan",
+    "Sun": "Yak"
+  },
+  "months": {
+    "0": "Yanvar",
+    "1": "Fevral",
+    "2": "Mart",
+    "3": "Aprel",
+    "4": "May",
+    "5": "Iyun",
+    "6": "Iyul",
+    "7": "Avgust",
+    "8": "Sentabr",
+    "9": "Oktabr",
+    "10": "Noyabr",
+    "11": "Dekabr"
+  },
+  "daysFull": {
+    "Mon": "Dushanba",
+    "Tue": "Seshanba",
+    "Wed": "Chorshanba",
+    "Thu": "Payshanba",
+    "Fri": "Juma",
+    "Sat": "Shanba",
+    "Sun": "Yakshanba"
   }
 }

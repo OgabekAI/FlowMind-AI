@@ -159,7 +159,7 @@ export default function Pomodoro() {
           gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
           oscillator.start(ctx.currentTime)
           oscillator.stop(ctx.currentTime + 0.5)
-        } catch {}
+        } catch { }
 
       } catch (err) {
         console.error(err)
@@ -236,11 +236,10 @@ export default function Pomodoro() {
                 key={key}
                 onClick={() => !isRunning && switchMode(key)}
                 disabled={isRunning}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  mode === key
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${mode === key
                     ? 'text-white'
                     : 'text-[#6666aa] hover:text-white disabled:cursor-not-allowed'
-                }`}
+                  }`}
                 style={mode === key ? { background: `${val.color}25`, color: val.color } : {}}
               >
                 {val.label}
@@ -370,7 +369,7 @@ export default function Pomodoro() {
                 />
               ))}
               <span className="text-xs text-[#6666aa] ml-2">
-                {stats?.today?.sessions_until_long_break || settings.sessions_before_long_break} until long break
+                {stats?.today?.sessions_until_long_break || settings.sessions_before_long_break} {t('pomodoro.untilLongBreak')}
               </span>
             </div>
           </div>
@@ -381,7 +380,7 @@ export default function Pomodoro() {
 
           {/* TODAY STATS */}
           <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
-            <h3 className="text-white font-bold mb-4">Today</h3>
+            <h3 className="text-white font-bold mb-4">{t('planner.today')}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white/5 rounded-xl p-3 text-center">
                 <div className="text-2xl font-bold text-white">{stats?.today?.sessions || 0}</div>
@@ -393,31 +392,30 @@ export default function Pomodoro() {
               </div>
               <div className="bg-white/5 rounded-xl p-3 text-center col-span-2">
                 <div className="text-2xl font-bold text-white">{stats?.all_time?.sessions || 0}</div>
-                <div className="text-[#6666aa] text-xs mt-1">All time sessions</div>
+                <div className="text-[#6666aa] text-xs mt-1">{t('pomodoro.allTimeSessions')}</div>
               </div>
             </div>
           </div>
 
           {/* RECENT SESSIONS */}
           <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5 flex-1">
-            <h3 className="text-white font-bold mb-4">Recent Sessions</h3>
+            <h3 className="text-white font-bold mb-4">{t('pomodoro.recentSessions')}</h3>
             {history.length === 0 ? (
               <div className="text-center py-6">
                 <div className="text-3xl mb-2">🍅</div>
-                <p className="text-[#6666aa] text-xs">No sessions yet</p>
+                <p className="text-[#6666aa] text-xs">{t('pomodoro.noSessions')}</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {history.slice(0, 8).map(session => (
                   <div key={session.id} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      session.status === 'completed' ? 'bg-[#43e97b]' :
-                      session.status === 'cancelled' ? 'bg-red-400' : 'bg-[#f7b731]'
-                    }`} />
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${session.status === 'completed' ? 'bg-[#43e97b]' :
+                        session.status === 'cancelled' ? 'bg-red-400' : 'bg-[#f7b731]'
+                      }`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-xs font-medium">
-                        {session.session_type === 'focus' ? '🎯 Focus' :
-                         session.session_type === 'short_break' ? '☕ Short Break' : '🛋️ Long Break'}
+                        {session.session_type === 'focus' ? `🎯 ${t('pomodoro.focusSession')}` :
+                          session.session_type === 'short_break' ? `☕ ${t('pomodoro.shortBreak')}` : `🛋️ ${t('pomodoro.longBreak')}`}
                       </p>
                       {session.task_title && (
                         <p className="text-[#6666aa] text-xs truncate">{session.task_title}</p>
@@ -436,29 +434,27 @@ export default function Pomodoro() {
       {showTaskPicker && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6 w-full max-w-md">
-            <h2 className="text-white font-bold text-lg mb-4">📌 Attach a Task</h2>
-            <p className="text-[#6666aa] text-sm mb-4">Select a task to focus on during this session</p>
+            <h2 className="text-white font-bold text-lg mb-4">📌 {t('pomodoro.attachTask')}</h2>
+            <p className="text-[#6666aa] text-sm mb-4">{t('pomodoro.attachTaskDesc')}</p>
 
             <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
               <button
                 onClick={() => { setSelectedTask(null); setShowTaskPicker(false) }}
-                className={`w-full text-left px-4 py-3 rounded-xl border transition-all text-sm ${
-                  !selectedTask
+                className={`w-full text-left px-4 py-3 rounded-xl border transition-all text-sm ${!selectedTask
                     ? 'border-[#7c6aff]/50 bg-[#7c6aff]/10 text-[#7c6aff]'
                     : 'border-white/10 text-[#6666aa] hover:text-white hover:border-white/20'
-                }`}
+                  }`}
               >
-                No task — free focus
+                {t('pomodoro.noTaskFocus')}
               </button>
               {tasks.filter(t => !t.is_done).map(task => (
                 <button
                   key={task.id}
                   onClick={() => { setSelectedTask(task); setShowTaskPicker(false) }}
-                  className={`w-full text-left px-4 py-3 rounded-xl border transition-all text-sm ${
-                    selectedTask?.id === task.id
+                  className={`w-full text-left px-4 py-3 rounded-xl border transition-all text-sm ${selectedTask?.id === task.id
                       ? 'border-[#7c6aff]/50 bg-[#7c6aff]/10 text-[#7c6aff]'
                       : 'border-white/10 text-white hover:border-white/20'
-                  }`}
+                    }`}
                 >
                   <div className="font-medium">{task.title}</div>
                   <div className="text-xs text-[#6666aa] mt-0.5">{task.category} · {task.duration_minutes}min</div>

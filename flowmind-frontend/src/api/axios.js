@@ -7,12 +7,15 @@ const api = axios.create({
   },
 })
 
-// Automatically add token to every request
+// Automatically add token and language to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Send current UI language so the backend can instruct the AI to respond in it
+  const lang = localStorage.getItem('i18nextLng') || 'en'
+  config.headers['Accept-Language'] = lang
   return config
 })
 

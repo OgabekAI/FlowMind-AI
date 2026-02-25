@@ -133,3 +133,43 @@ class TodayTasksView(APIView):
             serializer.data,
             status=status.HTTP_201_CREATED
         )
+
+
+class DatePlanView(APIView):
+    """GET /api/planner/{date}/ — get or create plan for any date (YYYY-MM-DD)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, date):
+        from datetime import datetime
+        try:
+            parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        plan, created = DailyPlan.objects.get_or_create(
+            user=request.user,
+            date=parsed_date
+        )
+        serializer = DailyPlanSerializer(plan)
+        return Response(serializer.data)
+
+
+class DateTasksView(APIView):
+    """POST /api/planner/{date}/tasks/ — create task for any date (YYYY-MM-DD)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, date):
+        from datetime import datetime
+        try:
+            parsed_date = datetime.strptime(date, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        plan, created = DailyPlan.objects.get_or_create(
+            user=request.user,
+            date=parsed_date
+        )
+        serializer = TaskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(plan=plan)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

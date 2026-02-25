@@ -7,6 +7,8 @@ from .views import (
     TaskDetailView,
     TaskToggleDoneView,
     TodayTasksView,
+    DatePlanView,
+    DateTasksView,
 )
 
 urlpatterns = [
@@ -17,4 +19,6 @@ urlpatterns = [
     path('<int:plan_id>/tasks/', TaskListCreateView.as_view(), name='task-list'),
     path('tasks/<int:pk>/', TaskDetailView.as_view(), name='task-detail'),
     path('tasks/<int:pk>/toggle/', TaskToggleDoneView.as_view(), name='task-toggle'),
+    path('<str:date>/', DatePlanView.as_view(), name='date-plan'),
+    path('<str:date>/tasks/', DateTasksView.as_view(), name='date-tasks'),
 ]

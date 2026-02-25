@@ -30,9 +30,13 @@ class WeeklySummaryAIView(APIView):
 
     def get(self, request):
         stats_data = get_weekly_stats(request.user)
+        language = request.headers.get('Accept-Language', 'en')[:2]
+        if language not in ('uz', 'ru', 'en'):
+            language = 'en'
         summary = generate_weekly_summary(
             request.user,
-            stats_data['summary']
+            stats_data['summary'],
+            language
         )
         return Response({
             'summary': summary,

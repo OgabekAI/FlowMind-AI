@@ -9,15 +9,15 @@ export default function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
 
-const navItems = [
-  { path: '/', icon: '🏠', label: t('nav.dashboard') },
-  { path: '/planner', icon: '📅', label: t('nav.planner') },
-  { path: '/goals', icon: '🎯', label: t('nav.goals') },
-  { path: '/pomodoro', icon: '🍅', label: t('nav.pomodoro') },
-  { path: '/chat', icon: '💬', label: t('nav.aiChat') },
-  { path: '/analytics', icon: '📊', label: t('nav.analytics') },
-  { path: '/profile', icon: '👤', label: t('Profile') },
-]
+  const navItems = [
+    { path: '/', icon: '🏠', label: t('nav.dashboard') },
+    { path: '/planner', icon: '📅', label: t('nav.planner') },
+    { path: '/goals', icon: '🎯', label: t('nav.goals') },
+    { path: '/pomodoro', icon: '🍅', label: t('nav.pomodoro') },
+    { path: '/chat', icon: '💬', label: t('nav.aiChat') },
+    { path: '/analytics', icon: '📊', label: t('nav.analytics') },
+    { path: '/profile', icon: '👤', label: t('nav.profile') },
+  ]
 
   const handleLogout = async () => {
     await logout()
@@ -44,11 +44,10 @@ const navItems = [
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
                   ? 'bg-[#7c6aff]/15 text-[#7c6aff]'
                   : 'text-[#6666aa] hover:bg-white/5 hover:text-white'
-              }`}
+                }`}
             >
               <span className="text-base">{item.icon}</span>
               {item.label}

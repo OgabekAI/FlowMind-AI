@@ -93,8 +93,8 @@ export default function Profile() {
 
       {/* HEADER */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Profile & Settings</h1>
-        <p className="text-[#6666aa] text-sm mt-1">Manage your account information</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-white">{t('profile.title')}</h1>
+        <p className="text-[#6666aa] text-sm mt-1">{t('profile.subtitle')}</p>
       </div>
 
       <div className="max-w-2xl space-y-6">
@@ -107,13 +107,13 @@ export default function Profile() {
           <div>
             <h2 className="text-white font-bold text-xl">{user?.username}</h2>
             <p className="text-[#6666aa] text-sm">{user?.email}</p>
-            <p className="text-[#6666aa] text-sm">{user?.occupation || 'No occupation set'}</p>
+            <p className="text-[#6666aa] text-sm">{user?.occupation || t('profile.noOccupation')}</p>
           </div>
         </div>
 
         {/* EDIT PROFILE */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-white font-bold text-lg mb-5">✏️ Edit Profile</h2>
+          <h2 className="text-white font-bold text-lg mb-5">✏️ {t('profile.editProfile')}</h2>
 
           {profileSuccess && (
             <div className="bg-[#43e97b]/10 border border-[#43e97b]/30 text-[#43e97b] rounded-xl px-4 py-3 mb-4 text-sm">
@@ -128,7 +128,7 @@ export default function Profile() {
 
           <form onSubmit={handleProfileSubmit} className="space-y-4">
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Username</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('profile.username')}</label>
               <input
                 type="text"
                 value={profileForm.username}
@@ -140,7 +140,7 @@ export default function Profile() {
 
             <div>
               <label className="text-sm text-[#6666aa] mb-1.5 block">
-                Occupation <span className="text-[#444466] text-xs">(optional)</span>
+                {t('profile.occupation')} <span className="text-[#444466] text-xs">({t('auth.optional')})</span>
               </label>
               <input
                 type="text"
@@ -153,12 +153,12 @@ export default function Profile() {
 
             <div>
               <label className="text-sm text-[#6666aa] mb-1.5 block">
-                Bio <span className="text-[#444466] text-xs">(optional)</span>
+                {t('profile.bio')} <span className="text-[#444466] text-xs">({t('auth.optional')})</span>
               </label>
               <textarea
                 value={profileForm.bio}
                 onChange={e => setProfileForm({ ...profileForm, bio: e.target.value })}
-                placeholder="Tell us a little about yourself..."
+                placeholder={t('profile.bioPlaceholder')}
                 rows={3}
                 className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#444466] focus:outline-none focus:border-[#7c6aff] transition-colors resize-none"
               />
@@ -169,14 +169,14 @@ export default function Profile() {
               disabled={savingProfile}
               className="w-full bg-[#7c6aff] hover:bg-[#6a58ee] disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-[#7c6aff]/25"
             >
-              {savingProfile ? 'Saving...' : 'Save Profile'}
+              {savingProfile ? t('profile.saving') : t('profile.saveProfile')}
             </button>
           </form>
         </div>
 
         {/* CHANGE PASSWORD */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-white font-bold text-lg mb-5">🔒 Change Password</h2>
+          <h2 className="text-white font-bold text-lg mb-5">🔒 {t('profile.changePassword')}</h2>
 
           {passwordSuccess && (
             <div className="bg-[#43e97b]/10 border border-[#43e97b]/30 text-[#43e97b] rounded-xl px-4 py-3 mb-4 text-sm">
@@ -191,7 +191,7 @@ export default function Profile() {
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Current Password</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('profile.currentPassword')}</label>
               <input
                 type="password"
                 value={passwordForm.current_password}
@@ -203,7 +203,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">New Password</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('profile.newPassword')}</label>
               <input
                 type="password"
                 value={passwordForm.new_password}
@@ -215,7 +215,7 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">Confirm New Password</label>
+              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('profile.confirmNewPassword')}</label>
               <input
                 type="password"
                 value={passwordForm.confirm_password}
@@ -231,25 +231,25 @@ export default function Profile() {
               disabled={savingPassword}
               className="w-full bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all"
             >
-              {savingPassword ? 'Changing...' : 'Change Password'}
+              {savingPassword ? t('profile.changing') : t('profile.changePasswordBtn')}
             </button>
           </form>
         </div>
 
         {/* APP INFO */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-white font-bold text-lg mb-4">📱 App Info</h2>
+          <h2 className="text-white font-bold text-lg mb-4">📱 {t('profile.appInfo')}</h2>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[#6666aa] text-sm">Version</span>
+              <span className="text-[#6666aa] text-sm">{t('profile.version')}</span>
               <span className="text-white text-sm font-medium">1.0.0</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#6666aa] text-sm">AI Model</span>
+              <span className="text-[#6666aa] text-sm">{t('profile.aiModel')}</span>
               <span className="text-white text-sm font-medium">Llama 3.3 70B</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#6666aa] text-sm">Languages</span>
+              <span className="text-[#6666aa] text-sm">{t('profile.languages')}</span>
               <span className="text-white text-sm font-medium">🇬🇧 EN · 🇺🇿 UZ · 🇷🇺 RU</span>
             </div>
           </div>

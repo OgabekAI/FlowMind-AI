@@ -24,7 +24,10 @@ class PlanFeedbackView(APIView):
             user=request.user,
             date=today
         )
-        feedback = generate_plan_feedback(request.user, plan)
+        language = request.headers.get('Accept-Language', 'en')[:2]
+        if language not in ('uz', 'ru', 'en'):
+            language = 'en'
+        feedback = generate_plan_feedback(request.user, plan, language)
         return Response({
             'feedback': feedback,
             'plan_date': str(plan.date),
@@ -41,7 +44,10 @@ class GoalFeedbackView(APIView):
             pk=goal_id,
             user=request.user
         )
-        feedback = generate_goal_feedback(request.user, goal)
+        language = request.headers.get('Accept-Language', 'en')[:2]
+        if language not in ('uz', 'ru', 'en'):
+            language = 'en'
+        feedback = generate_goal_feedback(request.user, goal, language)
         return Response({
             'feedback': feedback,
             'goal_title': goal.title,
@@ -85,7 +91,10 @@ class ChatView(APIView):
         )
 
         # Get AI response
-        ai_response = generate_chat_response(request.user, message)
+        language = request.headers.get('Accept-Language', 'en')[:2]
+        if language not in ('uz', 'ru', 'en'):
+            language = 'en'
+        ai_response = generate_chat_response(request.user, message, language)
 
         # Save AI message
         ai_msg = ChatMessage.objects.create(

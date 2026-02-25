@@ -1,4 +1,16 @@
-def get_daily_plan_feedback_prompt(user, plan, tasks):
+LANGUAGE_NAMES = {
+    'uz': 'Uzbek',
+    'ru': 'Russian',
+    'en': 'English',
+}
+
+
+def get_language_instruction(language):
+    lang_name = LANGUAGE_NAMES.get(language, 'English')
+    return f"IMPORTANT: You MUST respond ONLY in {lang_name}. Do not use any other language."
+
+
+def get_daily_plan_feedback_prompt(user, plan, tasks, language='en'):
     task_list = "\n".join([
         f"- {task.title} ({task.category}, "
         f"start: {task.start_time or 'no time'}, "
@@ -27,11 +39,11 @@ Write SHORT, WARM feedback (max 4 sentences):
 
 Write like a supportive mentor, not a robot. Be human and warm.
 No bullet points. Paragraph form only.
-IMPORTANT: Respond in the same language the tasks are written in.
+{get_language_instruction(language)}
 """
 
 
-def get_goal_feedback_prompt(user, goal, milestones):
+def get_goal_feedback_prompt(user, goal, milestones, language='en'):
     milestone_list = "\n".join([
         f"- {m.title} (done: {m.is_done})"
         for m in milestones
@@ -60,11 +72,12 @@ Write SHORT coaching feedback (max 4 sentences):
 
 Be like their most supportive mentor. Warm, honest, human.
 No bullet points. Paragraph form only.
-IMPORTANT: Respond in the same language as the goal title.
+{get_language_instruction(language)}
 """
 
 
-def get_chat_system_prompt(user, goals_text, tasks_text):
+def get_chat_system_prompt(user, goals_text, tasks_text, language='en'):
+    lang_name = LANGUAGE_NAMES.get(language, 'English')
     return f"""You are FlowMind AI — a personal productivity coach, motivator, and caring mentor inside the FlowMind app.
 
 You are talking with {user.username} (occupation: {user.occupation or 'student/professional'}).
@@ -120,10 +133,7 @@ PERSONALITY:
 - Connect everything back to their goals and progress
 
 STRICT RULES:
-1. ALWAYS respond in the SAME language the user writes in
-   - Uzbek → respond in Uzbek (use natural Uzbek, not formal)
-   - Russian → respond in Russian
-   - English → respond in English
+1. ALWAYS respond ONLY in {lang_name}. This is non-negotiable.
 2. Max 5-6 sentences per response — warm but concise
 3. Never greet with "Hello!" after the first message
 4. Never sound like a robot or formal assistant
@@ -132,7 +142,7 @@ STRICT RULES:
 """
 
 
-def get_weekly_summary_prompt(user, stats):
+def get_weekly_summary_prompt(user, stats, language='en'):
     return f"""
 You are FlowMind AI — a productivity coach.
 
@@ -154,4 +164,5 @@ Write a SHORT weekly summary (max 5 sentences):
 4. One motivational closing
 
 Be honest, warm, and specific. Write in paragraph form. No bullet points.
+{get_language_instruction(language)}
 """

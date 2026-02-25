@@ -11,9 +11,9 @@ from .prompts import (
 )
 
 
-def generate_plan_feedback(user, plan):
+def generate_plan_feedback(user, plan, language='en'):
     """Generate AI feedback for a daily plan"""
-    cache_key = f'plan_feedback_{plan.id}_{plan.completion_rate}'
+    cache_key = f'plan_feedback_{plan.id}_{plan.completion_rate}_{language}'
     cached = cache.get(cache_key)
     if cached:
         return cached
@@ -22,7 +22,7 @@ def generate_plan_feedback(user, plan):
     if not tasks.exists():
         return "Add some tasks to your plan first, then I can give you feedback!"
 
-    prompt = get_daily_plan_feedback_prompt(user, plan, tasks)
+    prompt = get_daily_plan_feedback_prompt(user, plan, tasks, language)
     feedback = groq.chat(prompt, max_tokens=300)
 
     # Cache for 1 hour
@@ -36,15 +36,15 @@ def generate_plan_feedback(user, plan):
     return feedback
 
 
-def generate_goal_feedback(user, goal):
+def generate_goal_feedback(user, goal, language='en'):
     """Generate AI coaching feedback for a goal"""
-    cache_key = f'goal_feedback_{goal.id}_{goal.progress}'
+    cache_key = f'goal_feedback_{goal.id}_{goal.progress}_{language}'
     cached = cache.get(cache_key)
     if cached:
         return cached
 
     milestones = goal.milestones.all()
-    prompt = get_goal_feedback_prompt(user, goal, milestones)
+    prompt = get_goal_feedback_prompt(user, goal, milestones, language)
     feedback = groq.chat(prompt, max_tokens=300)
 
     # Cache for 2 hours
@@ -58,7 +58,7 @@ def generate_goal_feedback(user, goal):
     return feedback
 
 
-def generate_chat_response(user, message):
+def generate_chat_response(user, message, language='en'):
     """Generate AI chat response with full conversation history"""
     from goals.models import Goal
     from planner.models import DailyPlan
@@ -99,7 +99,7 @@ def generate_chat_response(user, message):
     messages = [
         {
             "role": "system",
-            "content": get_chat_system_prompt(user, goals_text, tasks_text)
+            "content": get_chat_system_prompt(user, goals_text, tasks_text, language)
         }
     ]
 
@@ -147,14 +147,14 @@ def generate_chat_response(user, message):
         return "Something went wrong. Please try again."
 
 
-def generate_weekly_summary(user, stats):
+def generate_weekly_summary(user, stats, language='en'):
     """Generate AI weekly summary"""
-    cache_key = f'weekly_summary_{user.id}_{timezone.now().isocalendar()[1]}'
+    cache_key = f'weekly_summary_{user.id}_{timezone.now().isocalendar()[1]}_{language}'
     cached = cache.get(cache_key)
     if cached:
         return cached
 
-    prompt = get_weekly_summary_prompt(user, stats)
+    prompt = get_weekly_summary_prompt(user, stats, language)
     summary = groq.chat(prompt, max_tokens=400)
 
     # Cache for 24 hours

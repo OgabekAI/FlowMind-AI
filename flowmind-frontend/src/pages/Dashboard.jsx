@@ -175,7 +175,7 @@ export default function Dashboard() {
               disabled={loadingAi}
               className="bg-[#7c6aff] hover:bg-[#6a58ee] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all flex-shrink-0 disabled:opacity-50 shadow-lg shadow-[#7c6aff]/25"
             >
-              {loadingAi ? '🤖 ...' : '🤖 Get Feedback'}
+              {loadingAi ? '🤖 ...' : `🤖 ${t('dashboard.aiGetFeedback')}`}
             </button>
           )}
           {aiMessage && (
@@ -197,7 +197,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-white font-bold text-lg">{t('dashboard.todayPlan')}</h2>
             <Link to="/planner" className="text-[#7c6aff] text-xs hover:underline">
-              Open Planner →
+              {t('dashboard.openPlanner')}
             </Link>
           </div>
 
@@ -205,7 +205,7 @@ export default function Dashboard() {
           {totalTasks > 0 && (
             <div className="mb-4">
               <div className="flex justify-between text-xs text-[#6666aa] mb-1.5">
-                <span>{doneTasks} of {totalTasks} done</span>
+                <span>{doneTasks} {t('common.of', 'of')} {totalTasks} {t('planner.tasksDone')}</span>
                 <span>{completion}%</span>
               </div>
               <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -236,11 +236,10 @@ export default function Dashboard() {
                   onClick={() => toggleTask(task.id)}
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-all group"
                 >
-                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                    task.is_done
+                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.is_done
                       ? 'bg-[#43e97b] border-[#43e97b]'
                       : 'border-white/20 group-hover:border-[#7c6aff]'
-                  }`}>
+                    }`}>
                     {task.is_done && <span className="text-white text-xs">✓</span>}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -272,7 +271,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-white font-bold text-lg">{t('dashboard.activeGoals')}</h2>
             <Link to="/goals" className="text-[#7c6aff] text-xs hover:underline">
-              Open Goals →
+              {t('dashboard.openGoals')}
             </Link>
           </div>
 
@@ -318,8 +317,8 @@ export default function Dashboard() {
                       {goal.days_remaining > 0
                         ? `📅 ${goal.days_remaining} days remaining`
                         : goal.days_remaining === 0
-                        ? '⚡ Due today!'
-                        : '⚠️ Overdue!'}
+                          ? '⚡ Due today!'
+                          : '⚠️ Overdue!'}
                     </p>
                   )}
                 </div>
@@ -333,7 +332,7 @@ export default function Dashboard() {
           <h2 className="text-white font-bold text-lg mb-5">{t('analytics.weeklyStats')}</h2>
           {!weeklyStats?.days?.length ? (
             <div className="text-center py-8 text-[#6666aa] text-sm">
-              Complete some tasks to see your weekly chart!
+              {t('analytics.completeTasksHint')}
             </div>
           ) : (
             <>
@@ -370,17 +369,17 @@ export default function Dashboard() {
 
         {/* QUICK ACCESS */}
         <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-white font-bold text-lg mb-5">Quick Access</h2>
+          <h2 className="text-white font-bold text-lg mb-5">{t('dashboard.quickAccess')}</h2>
           <div className="grid grid-cols-2 gap-3">
             <Link to="/pomodoro" className="flex flex-col items-center gap-2 p-4 bg-[#ff6b6b]/10 border border-[#ff6b6b]/20 rounded-xl hover:bg-[#ff6b6b]/15 transition-all">
               <span className="text-2xl">🍅</span>
               <span className="text-white text-sm font-medium">{t('pomodoro.title')}</span>
-              <span className="text-[#6666aa] text-xs">{pomodoroStats?.today?.sessions || 0} sessions today</span>
+              <span className="text-[#6666aa] text-xs">{pomodoroStats?.today?.sessions || 0} {t('dashboard.sessionsToday')}</span>
             </Link>
             <Link to="/chat" className="flex flex-col items-center gap-2 p-4 bg-[#7c6aff]/10 border border-[#7c6aff]/20 rounded-xl hover:bg-[#7c6aff]/15 transition-all">
               <span className="text-2xl">💬</span>
               <span className="text-white text-sm font-medium">{t('chat.title')}</span>
-              <span className="text-[#6666aa] text-xs">AI Coach</span>
+              <span className="text-[#6666aa] text-xs">{t('dashboard.aiCoach')}</span>
             </Link>
             <Link to="/goals" className="flex flex-col items-center gap-2 p-4 bg-[#43e97b]/10 border border-[#43e97b]/20 rounded-xl hover:bg-[#43e97b]/15 transition-all">
               <span className="text-2xl">🎯</span>

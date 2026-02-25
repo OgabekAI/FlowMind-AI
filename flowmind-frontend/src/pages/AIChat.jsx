@@ -103,19 +103,19 @@ export default function AIChat() {
         </div>
         <div>
           <h1 className="text-white font-bold">{t('chat.title')}</h1>
-          <p className="text-[#6666aa] text-xs">Powered by Llama 3.3 · Always here to help</p>
+          <p className="text-[#6666aa] text-xs">{t('chat.poweredBy')}</p>
         </div>
         <div className="ml-auto flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#43e97b] animate-pulse" />
-            <span className="text-[#43e97b] text-xs font-medium">Online</span>
+            <span className="text-[#43e97b] text-xs font-medium">{t('chat.online')}</span>
           </div>
           {messages.length > 0 && (
             <button
               onClick={clearChat}
               className="bg-white/5 hover:bg-white/10 border border-white/10 text-[#6666aa] hover:text-red-400 text-xs px-3 py-1.5 rounded-lg transition-all"
             >
-              🗑️ Clear
+              🗑️ {t('chat.clear')}
             </button>
           )}
         </div>
@@ -161,11 +161,10 @@ export default function AIChat() {
                 className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
               >
                 {/* AVATAR */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${
-                  msg.role === 'user'
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${msg.role === 'user'
                     ? 'bg-gradient-to-br from-[#7c6aff] to-[#ff6b6b] text-white font-bold'
                     : 'bg-[#7c6aff] text-white'
-                }`}>
+                  }`}>
                   {msg.role === 'user'
                     ? user?.username?.[0]?.toUpperCase()
                     : '🤖'}
@@ -173,11 +172,10 @@ export default function AIChat() {
 
                 {/* BUBBLE */}
                 <div className={`max-w-[70%] flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                    msg.role === 'user'
+                  <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
                       ? 'bg-[#7c6aff] text-white rounded-tr-sm'
                       : 'bg-[#12121a] border border-white/10 text-[#d0d0f0] rounded-tl-sm'
-                  }`}>
+                    }`}>
                     {msg.content}
                   </div>
                   <span className="text-[#444466] text-xs px-1">
@@ -243,7 +241,7 @@ export default function AIChat() {
           </button>
         </div>
         <p className="text-[#444466] text-xs mt-2 text-center">
-          Press Enter to send · Shift+Enter for new line
+          {t('chat.enterToSend')}
         </p>
       </div>
 

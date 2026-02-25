@@ -166,7 +166,7 @@ export default function Goals() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white">{t('goals.title')}</h1>
-          <p className="text-[#6666aa] text-sm mt-1">{goals.length} goals total</p>
+          <p className="text-[#6666aa] text-sm mt-1">{goals.length} {t('goals.title', 'goals').toLowerCase()} {t('common.total', 'total')}</p>
         </div>
         <button
           onClick={() => openModal()}
@@ -181,7 +181,7 @@ export default function Goals() {
         <div className="flex flex-col items-center justify-center py-32">
           <div className="text-6xl mb-4">🎯</div>
           <p className="text-white font-bold text-xl mb-2">{t('goals.noGoals')}</p>
-          <p className="text-[#6666aa] text-sm mb-6">Set your first goal and start tracking progress</p>
+          <p className="text-[#6666aa] text-sm mb-6">{t('goals.noGoalsDesc')}</p>
           <button
             onClick={() => openModal()}
             className="bg-[#7c6aff] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#6a58ee] transition-all"
@@ -294,7 +294,7 @@ export default function Goals() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-sm text-[#6666aa] mb-1.5 block">Title</label>
+                <label className="text-sm text-[#6666aa] mb-1.5 block">{t('common.title', 'Title')}</label>
                 <input
                   type="text"
                   value={form.title}
@@ -306,7 +306,7 @@ export default function Goals() {
               </div>
 
               <div>
-                <label className="text-sm text-[#6666aa] mb-1.5 block">Description</label>
+                <label className="text-sm text-[#6666aa] mb-1.5 block">{t('goals.description', 'Description')}</label>
                 <textarea
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
@@ -393,9 +393,9 @@ export default function Goals() {
           <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6 w-full max-w-sm">
             <div className="text-center mb-6">
               <div className="text-5xl mb-4">🗑️</div>
-              <h2 className="text-white font-bold text-lg mb-2">Delete Goal?</h2>
+              <h2 className="text-white font-bold text-lg mb-2">{t('delete.goalTitle')}</h2>
               <p className="text-[#6666aa] text-sm">
-                This will permanently delete this goal and all its milestones. This cannot be undone.
+                {t('delete.goalDesc')}
               </p>
             </div>
             <div className="flex gap-3">
