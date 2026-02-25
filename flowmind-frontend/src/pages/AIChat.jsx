@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
+import BlobBackground from '../components/BlobBackground'
 
 export default function AIChat() {
   const { t } = useTranslation()
@@ -12,191 +13,128 @@ export default function AIChat() {
   const [fetching, setFetching] = useState(true)
   const bottomRef = useRef(null)
 
-  useEffect(() => {
-    fetchHistory()
-  }, [])
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  useEffect(() => { fetchHistory() }, [])
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
   const fetchHistory = async () => {
     try {
       const res = await api.get('/api/ai/chat/')
       setMessages(res.data.results || res.data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setFetching(false)
-    }
+    } catch (err) { console.error(err) } finally { setFetching(false) }
   }
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return
-
     const userMessage = input.trim()
     setInput('')
-
-    setMessages(prev => [...prev, {
-      id: Date.now(),
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date().toISOString(),
-    }])
-
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', content: userMessage, timestamp: new Date().toISOString() }])
     setLoading(true)
-
     try {
       const res = await api.post('/api/ai/chat/', { message: userMessage })
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: res.data.response,
-        timestamp: res.data.timestamp,
-      }])
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: res.data.response, timestamp: res.data.timestamp }])
     } catch {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: 'Sorry, I could not process your message. Please try again.',
-        timestamp: new Date().toISOString(),
-      }])
-    } finally {
-      setLoading(false)
-    }
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: 'Sorry, I could not process your message. Please try again.', timestamp: new Date().toISOString() }])
+    } finally { setLoading(false) }
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
-  }
-
-  const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+  const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }
+  const formatTime = (ts) => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const clearChat = () => setMessages([])
 
   const suggestedPrompts = [
-    t('chat.prompts.focus'),
-    t('chat.prompts.goals'),
-    t('chat.prompts.tip'),
-    t('chat.prompts.prioritize'),
-    t('chat.prompts.schedule'),
-    t('chat.prompts.motivate'),
+    t('chat.prompts.focus'), t('chat.prompts.goals'), t('chat.prompts.tip'),
+    t('chat.prompts.prioritize'), t('chat.prompts.schedule'), t('chat.prompts.motivate'),
   ]
 
-  const clearChat = () => {
-    setMessages([])
-  }
-
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0f]">
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#06060d', position: 'relative' }}>
+      <BlobBackground />
+      <style>{`@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} } @keyframes onlinePulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
 
       {/* HEADER */}
-      <div className="flex items-center gap-4 px-6 py-4 border-b border-white/10 bg-[#12121a] flex-shrink-0">
-        <div className="w-10 h-10 bg-[#7c6aff] rounded-xl flex items-center justify-center text-xl shadow-lg shadow-[#7c6aff]/30">
-          🤖
-        </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 16, padding: '16px 24px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(30px)',
+        flexShrink: 0, position: 'relative', zIndex: 2,
+      }}>
+        <div style={{ width: 42, height: 42, borderRadius: 12, background: '#7c6aff', boxShadow: '0 0 24px rgba(124,106,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤖</div>
         <div>
-          <h1 className="text-white font-bold">{t('chat.title')}</h1>
-          <p className="text-[#6666aa] text-xs">{t('chat.poweredBy')}</p>
+          <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 15 }}>{t('chat.title')}</h1>
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>{t('chat.poweredBy')}</p>
         </div>
-        <div className="ml-auto flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#43e97b] animate-pulse" />
-            <span className="text-[#43e97b] text-xs font-medium">{t('chat.online')}</span>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#43e97b', animation: 'onlinePulse 2s infinite' }} />
+            <span style={{ color: '#43e97b', fontSize: 12, fontWeight: 500 }}>{t('chat.online')}</span>
           </div>
           {messages.length > 0 && (
-            <button
-              onClick={clearChat}
-              className="bg-white/5 hover:bg-white/10 border border-white/10 text-[#6666aa] hover:text-red-400 text-xs px-3 py-1.5 rounded-lg transition-all"
-            >
-              🗑️ {t('chat.clear')}
-            </button>
+            <button onClick={clearChat} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 12, padding: '6px 12px', borderRadius: 8, cursor: 'pointer' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,107,0.1)'; e.currentTarget.style.color = '#ff6b6b' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+            >🗑️ {t('chat.clear')}</button>
           )}
         </div>
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
         {fetching ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-[#7c6aff]">Loading...</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            <div style={{ color: '#7c6aff' }}>Loading...</div>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-6">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🤖</div>
-              <h2 className="text-white font-bold text-xl mb-2">
-                Hey {user?.username}! 👋
-              </h2>
-              <p className="text-[#6666aa] text-sm max-w-sm">
-                {t('chat.emptyState')} I know your goals and today's plan — ask me anything!
-              </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 24 }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 64, marginBottom: 16 }}>🤖</div>
+              <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 22, marginBottom: 8 }}>Hey {user?.username}! 👋</h2>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, maxWidth: 360 }}>{t('chat.emptyState')} I know your goals and today's plan — ask me anything!</p>
             </div>
-
-            {/* SUGGESTED PROMPTS — empty state */}
-            <div className="grid grid-cols-2 gap-2 w-full max-w-lg">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%', maxWidth: 480 }}>
               {suggestedPrompts.map((prompt, i) => (
-                <button
-                  key={i}
-                  onClick={() => setInput(prompt)}
-                  className="text-left px-4 py-3 bg-[#12121a] border border-white/10 hover:border-[#7c6aff]/30 hover:bg-[#7c6aff]/5 rounded-xl text-[#6666aa] hover:text-white text-xs transition-all"
-                >
-                  {prompt}
-                </button>
+                <button key={i} onClick={() => setInput(prompt)} style={{
+                  textAlign: 'left', padding: '12px 16px',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 14, color: 'rgba(255,255,255,0.5)', fontSize: 12, cursor: 'pointer', transition: 'all 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(124,106,255,0.3)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(124,106,255,0.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                >{prompt}</button>
               ))}
             </div>
           </div>
         ) : (
           <>
             {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-              >
-                {/* AVATAR */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 ${msg.role === 'user'
-                    ? 'bg-gradient-to-br from-[#7c6aff] to-[#ff6b6b] text-white font-bold'
-                    : 'bg-[#7c6aff] text-white'
-                  }`}>
-                  {msg.role === 'user'
-                    ? user?.username?.[0]?.toUpperCase()
-                    : '🤖'}
+              <div key={msg.id} style={{ display: 'flex', gap: 12, flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: msg.role === 'user' ? 14 : 16,
+                  background: msg.role === 'user' ? 'linear-gradient(135deg,#7c6aff,#ff6b6b)' : '#7c6aff',
+                  color: '#fff', fontWeight: 700,
+                }}>
+                  {msg.role === 'user' ? user?.username?.[0]?.toUpperCase() : '🤖'}
                 </div>
-
-                {/* BUBBLE */}
-                <div className={`max-w-[70%] flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
-                      ? 'bg-[#7c6aff] text-white rounded-tr-sm'
-                      : 'bg-[#12121a] border border-white/10 text-[#d0d0f0] rounded-tl-sm'
-                    }`}>
-                    {msg.content}
-                  </div>
-                  <span className="text-[#444466] text-xs px-1">
-                    {formatTime(msg.timestamp)}
-                  </span>
+                <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', gap: 4, alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                  <div style={{
+                    padding: '12px 16px', fontSize: 14, lineHeight: 1.6,
+                    ...(msg.role === 'user'
+                      ? { background: 'linear-gradient(135deg,#7c6aff,#a855f7)', borderRadius: '18px 18px 4px 18px', color: '#fff', boxShadow: '0 4px 16px rgba(124,106,255,0.3)' }
+                      : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderLeft: '2px solid #43e97b', borderRadius: '18px 18px 18px 4px', color: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)' }
+                    ),
+                  }}>{msg.content}</div>
+                  <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, paddingInline: 4 }}>{formatTime(msg.timestamp)}</span>
                 </div>
               </div>
             ))}
-
-            {/* TYPING INDICATOR */}
             {loading && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#7c6aff] flex items-center justify-center text-sm flex-shrink-0">
-                  🤖
-                </div>
-                <div className="bg-[#12121a] border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3">
-                  <div className="flex gap-1 items-center">
-                    <div className="w-2 h-2 rounded-full bg-[#7c6aff] animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 rounded-full bg-[#7c6aff] animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 rounded-full bg-[#7c6aff] animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#7c6aff', boxShadow: '0 0 16px rgba(124,106,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🤖</div>
+                <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '18px 18px 18px 4px', padding: '14px 18px', display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {[0, 150, 300].map((d, i) => (
+                    <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: '#7c6aff', boxShadow: '0 0 6px rgba(124,106,255,0.6)', animation: `bounce 1s infinite`, animationDelay: `${d}ms` }} />
+                  ))}
                 </div>
               </div>
             )}
@@ -205,46 +143,52 @@ export default function AIChat() {
         )}
       </div>
 
-      {/* SUGGESTED PROMPTS — shown when there are messages */}
+      {/* QUICK PROMPTS */}
       {messages.length > 0 && !loading && (
-        <div className="px-6 py-2 flex gap-2 overflow-x-auto flex-shrink-0">
+        <div style={{ padding: '8px 24px', display: 'flex', gap: 8, overflowX: 'auto', flexShrink: 0, position: 'relative', zIndex: 2 }}>
           {suggestedPrompts.slice(0, 4).map((prompt, i) => (
-            <button
-              key={i}
-              onClick={() => setInput(prompt)}
-              className="flex-shrink-0 px-3 py-1.5 bg-[#12121a] border border-white/10 hover:border-[#7c6aff]/30 rounded-xl text-[#6666aa] hover:text-white text-xs transition-all"
-            >
-              {prompt}
-            </button>
+            <button key={i} onClick={() => setInput(prompt)} style={{ flexShrink: 0, padding: '6px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, color: 'rgba(255,255,255,0.4)', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(124,106,255,0.3)'; e.currentTarget.style.color = '#a89aff' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+            >{prompt}</button>
           ))}
         </div>
       )}
 
       {/* INPUT */}
-      <div className="px-6 py-4 border-t border-white/10 bg-[#12121a] flex-shrink-0">
-        <div className="flex gap-3 items-end">
+      <div style={{
+        padding: '16px 24px', background: 'rgba(255,255,255,0.03)',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(30px)', flexShrink: 0, position: 'relative', zIndex: 2,
+      }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('chat.placeholder')}
             rows={1}
-            className="flex-1 bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#444466] focus:outline-none focus:border-[#7c6aff] transition-colors resize-none"
-            style={{ maxHeight: '120px' }}
+            style={{
+              flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 14, padding: '12px 16px', color: '#fff', fontSize: 14, outline: 'none',
+              resize: 'none', maxHeight: 120, fontFamily: 'inherit', transition: 'border-color 0.2s',
+            }}
+            onFocus={e => { e.target.style.borderColor = 'rgba(124,106,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(124,106,255,0.1)' }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none' }}
           />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || loading}
-            className="w-11 h-11 bg-[#7c6aff] hover:bg-[#6a58ee] disabled:opacity-40 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-all shadow-lg shadow-[#7c6aff]/25 flex-shrink-0"
-          >
-            <span className="text-white text-lg">↑</span>
-          </button>
+          <button onClick={sendMessage} disabled={!input.trim() || loading} style={{
+            width: 44, height: 44, background: '#7c6aff', border: 'none', cursor: 'pointer',
+            borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 16px rgba(124,106,255,0.35)', flexShrink: 0,
+            opacity: (!input.trim() || loading) ? 0.4 : 1, fontSize: 18, color: '#fff',
+            transition: 'all 0.2s',
+          }}
+            onMouseEnter={e => { if (input.trim() && !loading) e.currentTarget.style.background = '#6a58ee' }}
+            onMouseLeave={e => e.currentTarget.style.background = '#7c6aff'}
+          >↑</button>
         </div>
-        <p className="text-[#444466] text-xs mt-2 text-center">
-          {t('chat.enterToSend')}
-        </p>
+        <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, textAlign: 'center', marginTop: 8 }}>{t('chat.enterToSend')}</p>
       </div>
-
     </div>
   )
 }

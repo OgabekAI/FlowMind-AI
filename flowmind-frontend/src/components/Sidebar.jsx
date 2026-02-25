@@ -25,62 +25,110 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-60 h-screen sticky top-0 bg-[#12121a] border-r border-white/10 flex flex-col py-6 px-3 flex-shrink-0 overflow-y-auto">
+    <aside style={{
+      width: 280, minHeight: '100vh', position: 'sticky', top: 0,
+      background: 'rgba(8,8,15,0.95)', backdropFilter: 'blur(30px)',
+      WebkitBackdropFilter: 'blur(30px)',
+      borderRight: '1px solid rgba(255,255,255,0.06)',
+      display: 'flex', flexDirection: 'column', padding: '28px 16px', flexShrink: 0, overflowY: 'auto'
+    }}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-3 mb-8">
-        <div className="w-9 h-9 bg-[#7c6aff] rounded-xl flex items-center justify-center text-lg shadow-lg shadow-[#7c6aff]/30">
-          🧠
-        </div>
-        <span className="text-white font-bold text-lg">
-          Flow<span className="text-[#7c6aff]">Mind</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '0 8px', marginBottom: 36 }}>
+        <div style={{
+          width: 42, height: 42, borderRadius: 12,
+          background: '#7c6aff',
+          boxShadow: '0 0 20px rgba(124,106,255,0.45)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0
+        }}>🧠</div>
+        <span style={{ color: '#fff', fontWeight: 800, fontSize: 19 }}>
+          Flow<span style={{ color: '#7c6aff' }}>Mind</span>
         </span>
       </div>
 
       {/* Nav */}
-      <nav className="flex flex-col gap-1 flex-1">
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                  ? 'bg-[#7c6aff]/15 text-[#7c6aff]'
-                  : 'text-[#6666aa] hover:bg-white/5 hover:text-white'
-                }`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '13px 16px', borderRadius: 14,
+                textDecoration: 'none', fontSize: 14, fontWeight: 500,
+                transition: 'all 0.2s',
+                background: isActive ? 'rgba(124,106,255,0.12)' : 'transparent',
+                border: isActive ? '1px solid rgba(124,106,255,0.2)' : '1px solid transparent',
+                color: isActive ? '#7c6aff' : 'rgba(255,255,255,0.45)',
+                boxShadow: isActive ? 'inset 0 0 14px rgba(124,106,255,0.15)' : 'none',
+              }}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff' } }}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)' } }}
             >
-              <span className="text-base">{item.icon}</span>
+              <span style={{ fontSize: 20 }}>{item.icon}</span>
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      {/* Language Switcher */}
-      <div className="px-1 mb-4">
-        <LanguageSwitcher />
-      </div>
+      {/* Bottom section — glass card */}
+      <div style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 18,
+        padding: '12px 8px 8px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* top gradient glow line */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(124,106,255,0.4), transparent)' }} />
 
-      {/* User */}
-      <div className="border-t border-white/10 pt-4">
+        {/* Language Switcher */}
+        <div style={{ marginBottom: 10 }}>
+          <LanguageSwitcher />
+        </div>
+
+        {/* Profile link */}
         <Link
           to="/profile"
-          className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 transition-all group mb-1"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 10px', borderRadius: 12, textDecoration: 'none',
+            marginBottom: 2, transition: 'background 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c6aff] to-[#ff6b6b] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+          <div style={{
+            width: 38, height: 38, borderRadius: '50%',
+            background: 'linear-gradient(135deg, #7c6aff, #ff6b6b)',
+            boxShadow: '0 0 14px rgba(124,106,255,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 15, fontWeight: 700, flexShrink: 0,
+          }}>
             {user?.username?.[0]?.toUpperCase() || 'U'}
           </div>
-          <div className="flex-1 overflow-hidden">
-            <div className="text-white text-sm font-medium truncate group-hover:text-[#7c6aff] transition-colors">{user?.username}</div>
-            <div className="text-[#6666aa] text-xs truncate">{user?.occupation || 'FlowMind User'}</div>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.username}</div>
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.occupation || 'FlowMind User'}</div>
           </div>
-          <span className="text-[#6666aa] group-hover:text-[#7c6aff] text-xs transition-colors">⚙️</span>
         </Link>
+
+        {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#6666aa] hover:bg-white/5 hover:text-red-400 transition-all duration-200"
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 10px', borderRadius: 12, background: 'transparent',
+            border: 'none', cursor: 'pointer', fontSize: 14,
+            color: 'rgba(255,255,255,0.35)', transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,107,0.1)'; e.currentTarget.style.color = '#ff6b6b' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.35)' }}
         >
-          <span>🚪</span> {t('common.logout')}
+          <span style={{ fontSize: 20 }}>🚪</span> {t('common.logout')}
         </button>
       </div>
     </aside>

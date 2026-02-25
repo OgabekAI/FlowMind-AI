@@ -2,24 +2,25 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../i18n'
 import api from '../api/axios'
+import BlobBackground from '../components/BlobBackground'
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
-const categoryColors = {
-  study: { bg: 'bg-[#7c6aff]/15', text: 'text-[#7c6aff]', dot: '#7c6aff' },
-  fitness: { bg: 'bg-[#43e97b]/15', text: 'text-[#43e97b]', dot: '#43e97b' },
-  personal: { bg: 'bg-[#f7b731]/15', text: 'text-[#f7b731]', dot: '#f7b731' },
-  work: { bg: 'bg-[#45aaf2]/15', text: 'text-[#45aaf2]', dot: '#45aaf2' },
-  health: { bg: 'bg-[#ff6b6b]/15', text: 'text-[#ff6b6b]', dot: '#ff6b6b' },
-  finance: { bg: 'bg-[#26de81]/15', text: 'text-[#26de81]', dot: '#26de81' },
-  break: { bg: 'bg-white/5', text: 'text-white/40', dot: '#666' },
-  other: { bg: 'bg-white/5', text: 'text-white/40', dot: '#666' },
+const catColors = {
+  study: { dot: '#7c6aff', bg: 'rgba(124,106,255,0.15)', color: '#7c6aff' },
+  fitness: { dot: '#43e97b', bg: 'rgba(67,233,123,0.15)', color: '#43e97b' },
+  personal: { dot: '#f7b731', bg: 'rgba(247,183,49,0.15)', color: '#f7b731' },
+  work: { dot: '#45aaf2', bg: 'rgba(69,170,242,0.15)', color: '#45aaf2' },
+  health: { dot: '#ff6b6b', bg: 'rgba(255,107,107,0.15)', color: '#ff6b6b' },
+  finance: { dot: '#26de81', bg: 'rgba(38,222,129,0.15)', color: '#26de81' },
+  break: { dot: '#666', bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' },
+  other: { dot: '#666', bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' },
 }
 
 const priorityConfig = {
-  high: { labelKey: 'planner.priorities.high', color: 'text-red-400', bg: 'bg-red-500/10' },
-  medium: { labelKey: 'planner.priorities.medium', color: 'text-[#f7b731]', bg: 'bg-[#f7b731]/10' },
-  low: { labelKey: 'planner.priorities.low', color: 'text-[#43e97b]', bg: 'bg-[#43e97b]/10' },
+  high: { labelKey: 'planner.priorities.high', bg: 'rgba(255,107,107,0.15)', color: '#ff6b6b' },
+  medium: { labelKey: 'planner.priorities.medium', bg: 'rgba(247,183,49,0.15)', color: '#f7b731' },
+  low: { labelKey: 'planner.priorities.low', bg: 'rgba(67,233,123,0.15)', color: '#43e97b' },
 }
 
 function calcDurationText(start, end) {
@@ -33,15 +34,13 @@ function calcDurationText(start, end) {
   return h > 0 ? `${h}h ${m}min` : `${m}min`
 }
 
-function toISO(date) {
-  return date.toISOString().slice(0, 10)
-}
+function toISO(date) { return date.toISOString().slice(0, 10) }
 
 function getWeekDays() {
   const today = new Date()
-  const dow = today.getDay()                  // 0=Sun
+  const dow = today.getDay()
   const monday = new Date(today)
-  monday.setDate(today.getDate() - ((dow + 6) % 7))  // rewind to Mon
+  monday.setDate(today.getDate() - ((dow + 6) % 7))
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
@@ -49,38 +48,31 @@ function getWeekDays() {
   })
 }
 
-// ─── shared empty form ────────────────────────────────────────────────────────
+const EMPTY_FORM = { title: '', description: '', category: 'personal', priority: 'medium', start_time: '', end_time: '', goal: '' }
 
-const EMPTY_FORM = {
-  title: '', description: '', category: 'personal',
-  priority: 'medium', start_time: '', end_time: '', goal: '',
-}
+const GLASS = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)', borderRadius: 24 }
+const GLASS_PURPLE = { background: 'rgba(124,106,255,0.06)', border: '1px solid rgba(124,106,255,0.15)', backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)', borderRadius: 20, position: 'relative', overflow: 'hidden' }
+const INPUT = { width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '11px 14px', color: '#fff', fontSize: 14, outline: 'none', fontFamily: 'inherit' }
 
 // ══════════════════════════════════════════════════════════════════════════════
 export default function Planner() {
   const { t } = useTranslation()
 
-  // ── tab state ──────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState('today')   // 'today' | 'week'
-
-  // ── today state ───────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState('today')
   const [plan, setPlan] = useState(null)
   const [goals, setGoals] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editTask, setEditTask] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
-  const [modalDate, setModalDate] = useState(null)   // for weekly add
+  const [modalDate, setModalDate] = useState(null)
   const [aiFeedback, setAiFeedback] = useState('')
   const [loadingAi, setLoadingAi] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
-
-  // ── weekly state ──────────────────────────────────────────────────────────
-  const [weekPlans, setWeekPlans] = useState({})     // { 'YYYY-MM-DD': planObj }
+  const [weekPlans, setWeekPlans] = useState({})
   const [weekLoading, setWeekLoading] = useState(false)
-  const [expandedDay, setExpandedDay] = useState(null)   // ISO string
+  const [expandedDay, setExpandedDay] = useState(null)
 
-  // ── fetch today on mount ───────────────────────────────────────────────────
   useEffect(() => { fetchAll() }, [])
 
   const fetchAll = async () => {
@@ -91,163 +83,86 @@ export default function Planner() {
       ])
       setPlan(planRes.data)
       setGoals(goalsRes.data.results || goalsRes.data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err) { console.error(err) } finally { setLoading(false) }
   }
 
-  // ── fetch week ─────────────────────────────────────────────────────────────
   const fetchWeek = useCallback(async () => {
     setWeekLoading(true)
     try {
       const days = getWeekDays()
-      const results = await Promise.all(
-        days.map(d => api.get(`/api/planner/${toISO(d)}/`).then(r => r.data))
-      )
+      const results = await Promise.all(days.map(d => api.get(`/api/planner/${toISO(d)}/`).then(r => r.data)))
       const map = {}
       days.forEach((d, i) => { map[toISO(d)] = results[i] })
       setWeekPlans(map)
-      // expand today automatically
       setExpandedDay(toISO(new Date()))
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setWeekLoading(false)
-    }
+    } catch (err) { console.error(err) } finally { setWeekLoading(false) }
   }, [])
 
-  useEffect(() => {
-    if (activeTab === 'week') fetchWeek()
-  }, [activeTab, fetchWeek])
-
-  // ── handlers ──────────────────────────────────────────────────────────────
+  useEffect(() => { if (activeTab === 'week') fetchWeek() }, [activeTab, fetchWeek])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (form.start_time && form.end_time) {
       const [sh, sm] = form.start_time.split(':').map(Number)
       const [eh, em] = form.end_time.split(':').map(Number)
-      if ((eh * 60 + em) <= (sh * 60 + sm)) {
-        alert(t('planner.endTimeError', 'End time must be after start time'))
-        return
-      }
+      if ((eh * 60 + em) <= (sh * 60 + sm)) { alert(t('planner.endTimeError', 'End time must be after start time')); return }
     }
     const payload = { ...form, goal: form.goal || null }
     try {
       if (editTask) {
-        // editing existing task
         const res = await api.put(`/api/planner/tasks/${editTask.id}/`, payload)
         const updated = res.data
-        // update today view
-        if (plan) {
-          setPlan(prev => ({
-            ...prev,
-            tasks: prev.tasks.map(tk => tk.id === editTask.id ? updated : tk)
-          }))
-        }
-        // update week view
+        if (plan) setPlan(prev => ({ ...prev, tasks: prev.tasks.map(tk => tk.id === editTask.id ? updated : tk) }))
         setWeekPlans(prev => {
           const newMap = { ...prev }
-          Object.keys(newMap).forEach(dateKey => {
-            if (newMap[dateKey]?.tasks?.find(tk => tk.id === editTask.id)) {
-              newMap[dateKey] = {
-                ...newMap[dateKey],
-                tasks: newMap[dateKey].tasks.map(tk => tk.id === editTask.id ? updated : tk)
-              }
-            }
+          Object.keys(newMap).forEach(dk => {
+            if (newMap[dk]?.tasks?.find(tk => tk.id === editTask.id))
+              newMap[dk] = { ...newMap[dk], tasks: newMap[dk].tasks.map(tk => tk.id === editTask.id ? updated : tk) }
           })
           return newMap
         })
       } else {
-        // creating new task — use modalDate if in weekly tab
         const targetDate = modalDate || toISO(new Date())
         const isToday = targetDate === toISO(new Date())
         const endpoint = isToday ? '/api/planner/today/tasks/' : `/api/planner/${targetDate}/tasks/`
         const res = await api.post(endpoint, payload)
         const created = res.data
-        // update today view
-        if (isToday && plan) {
-          setPlan(prev => ({ ...prev, tasks: [...(prev.tasks || []), created] }))
-        }
-        // update week view
+        if (isToday && plan) setPlan(prev => ({ ...prev, tasks: [...(prev.tasks || []), created] }))
         setWeekPlans(prev => {
           if (!prev[targetDate]) return prev
-          return {
-            ...prev,
-            [targetDate]: {
-              ...prev[targetDate],
-              tasks: [...(prev[targetDate].tasks || []), created]
-            }
-          }
+          return { ...prev, [targetDate]: { ...prev[targetDate], tasks: [...(prev[targetDate].tasks || []), created] } }
         })
       }
       closeModal()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleToggle = async (taskId, dateKey) => {
     try {
       const res = await api.patch(`/api/planner/tasks/${taskId}/toggle/`)
       const updated = res.data
-      // update today view
-      if (plan) {
-        setPlan(prev => ({
-          ...prev,
-          tasks: prev.tasks.map(tk => tk.id === taskId ? updated : tk)
-        }))
-      }
-      // update week view
-      if (dateKey) {
-        setWeekPlans(prev => ({
-          ...prev,
-          [dateKey]: {
-            ...prev[dateKey],
-            tasks: prev[dateKey].tasks.map(tk => tk.id === taskId ? updated : tk)
-          }
-        }))
-      }
-    } catch (err) {
-      console.error(err)
-    }
+      if (plan) setPlan(prev => ({ ...prev, tasks: prev.tasks.map(tk => tk.id === taskId ? updated : tk) }))
+      if (dateKey) setWeekPlans(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], tasks: prev[dateKey].tasks.map(tk => tk.id === taskId ? updated : tk) } }))
+    } catch (err) { console.error(err) }
   }
 
   const handleDelete = async (id) => {
     try {
       await api.delete(`/api/planner/tasks/${id}/`)
-      // update today view
-      if (plan) {
-        setPlan(prev => ({ ...prev, tasks: prev.tasks.filter(tk => tk.id !== id) }))
-      }
-      // update week view
+      if (plan) setPlan(prev => ({ ...prev, tasks: prev.tasks.filter(tk => tk.id !== id) }))
       setWeekPlans(prev => {
         const newMap = { ...prev }
-        Object.keys(newMap).forEach(dk => {
-          if (newMap[dk]?.tasks) {
-            newMap[dk] = { ...newMap[dk], tasks: newMap[dk].tasks.filter(tk => tk.id !== id) }
-          }
-        })
+        Object.keys(newMap).forEach(dk => { if (newMap[dk]?.tasks) newMap[dk] = { ...newMap[dk], tasks: newMap[dk].tasks.filter(tk => tk.id !== id) } })
         return newMap
       })
       setDeleteId(null)
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const getAiFeedback = async () => {
     setLoadingAi(true)
-    try {
-      const res = await api.get('/api/ai/plan/feedback/')
-      setAiFeedback(res.data.feedback)
-    } catch {
-      setAiFeedback(t('planner.noTasksAiFeedback'))
-    } finally {
-      setLoadingAi(false)
-    }
+    try { const res = await api.get('/api/ai/plan/feedback/'); setAiFeedback(res.data.feedback) }
+    catch { setAiFeedback(t('planner.noTasksAiFeedback')) } finally { setLoadingAi(false) }
   }
 
   const calculateCompletion = (tasks) => {
@@ -257,28 +172,13 @@ export default function Planner() {
 
   const openModal = (task = null, date = null) => {
     if (task) {
-      setForm({
-        title: task.title, description: task.description || '',
-        category: task.category, priority: task.priority,
-        start_time: task.start_time || '', end_time: task.end_time || '',
-        goal: task.goal || '',
-      })
+      setForm({ title: task.title, description: task.description || '', category: task.category, priority: task.priority, start_time: task.start_time || '', end_time: task.end_time || '', goal: task.goal || '' })
       setEditTask(task)
-    } else {
-      setForm(EMPTY_FORM)
-      setEditTask(null)
-    }
+    } else { setForm(EMPTY_FORM); setEditTask(null) }
     setModalDate(date || toISO(new Date()))
     setShowModal(true)
   }
-
-  const closeModal = () => {
-    setShowModal(false)
-    setEditTask(null)
-    setModalDate(null)
-  }
-
-  // ── date formatting ────────────────────────────────────────────────────────
+  const closeModal = () => { setShowModal(false); setEditTask(null); setModalDate(null) }
 
   const formatDate = () => {
     const now = new Date()
@@ -294,25 +194,17 @@ export default function Planner() {
   }
 
   const formatDayLabel = (date) => {
-    if (i18n.language === 'uz') {
-      const engDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-      const dayKey = engDays[date.getDay()]
-      return i18n.t(`daysFull.${dayKey}`, dayKey)
-    }
+    if (i18n.language === 'uz') { const engDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; return i18n.t(`daysFull.${engDays[date.getDay()]}`, engDays[date.getDay()]) }
     const locale = { ru: 'ru-RU', en: 'en-US' }[i18n.language] || 'en-US'
     return date.toLocaleDateString(locale, { weekday: 'long' })
   }
 
   const formatShortDate = (date) => {
-    if (i18n.language === 'uz') {
-      const month = i18n.t(`months.${date.getMonth()}`, date.getMonth() + 1)
-      return `${date.getDate()} ${month}`
-    }
+    if (i18n.language === 'uz') { const month = i18n.t(`months.${date.getMonth()}`, date.getMonth() + 1); return `${date.getDate()} ${month}` }
     const locale = { ru: 'ru-RU', en: 'en-US' }[i18n.language] || 'en-US'
     return date.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
   }
 
-  // ── computed ───────────────────────────────────────────────────────────────
   const today = formatDate()
   const durationText = calcDurationText(form.start_time, form.end_time)
   const doneTasks = plan?.tasks?.filter(tk => tk.is_done).length || 0
@@ -320,503 +212,383 @@ export default function Planner() {
   const completion = calculateCompletion(plan?.tasks)
   const sortedTasks = plan?.tasks?.slice().sort((a, b) => {
     if (a.start_time && b.start_time) return a.start_time.localeCompare(b.start_time)
-    if (a.start_time) return -1
-    if (b.start_time) return 1
-    return 0
+    if (a.start_time) return -1; if (b.start_time) return 1; return 0
   }) || []
-
   const todayISO = toISO(new Date())
   const weekDays = getWeekDays()
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-      <div className="text-[#7c6aff]">{t('common.loading')}</div>
+    <div style={{ minHeight: '100vh', background: '#06060d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <BlobBackground /><div style={{ color: '#7c6aff', position: 'relative', zIndex: 1 }}>{t('common.loading')}</div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] p-6 md:p-8">
+    <div style={{ minHeight: '100vh', background: '#06060d', padding: 32, position: 'relative' }}>
+      <BlobBackground />
+      <div style={{ position: 'relative', zIndex: 1 }}>
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">{t('planner.title')}</h1>
-          <p className="text-[#6666aa] text-sm mt-1">{today}</p>
-        </div>
-        <button
-          onClick={() => openModal(null, activeTab === 'today' ? todayISO : (expandedDay || todayISO))}
-          className="bg-[#7c6aff] hover:bg-[#6a58ee] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-[#7c6aff]/25"
-        >
-          + {t('planner.addTask')}
-        </button>
-      </div>
-
-      {/* TAB SWITCHER */}
-      <div className="bg-[#12121a] border border-white/10 rounded-xl p-1 flex gap-1 mb-6 w-fit">
-        <button
-          onClick={() => setActiveTab('today')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'today' ? 'bg-[#7c6aff] text-white' : 'text-[#6666aa] hover:text-white'
-            }`}
-        >
-          {t('planner.todayView')}
-        </button>
-        <button
-          onClick={() => setActiveTab('week')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'week' ? 'bg-[#7c6aff] text-white' : 'text-[#6666aa] hover:text-white'
-            }`}
-        >
-          {t('planner.weeklyView')}
-        </button>
-      </div>
-
-      {/* ══════════════ TODAY TAB ══════════════ */}
-      {activeTab === 'today' && (
-        <>
-          {/* PROGRESS BAR */}
-          <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <span className="text-white font-semibold">{doneTasks} / {totalTasks} {t('planner.tasksDone')}</span>
-                <span className="text-[#6666aa] text-sm ml-2">{t('planner.today')}</span>
-              </div>
-              <span className="text-[#7c6aff] font-bold text-lg">{completion}%</span>
-            </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#7c6aff] to-[#a855f7] rounded-full transition-all duration-700"
-                style={{ width: `${completion}%` }}
-              />
-            </div>
+        {/* HEADER */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>{t('planner.title')}</h1>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 4 }}>{today}</p>
           </div>
+          <button
+            onClick={() => openModal(null, activeTab === 'today' ? todayISO : (expandedDay || todayISO))}
+            style={{ background: '#7c6aff', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, padding: '10px 18px', borderRadius: 12, boxShadow: '0 4px 16px rgba(124,106,255,0.35)' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#6a58ee'}
+            onMouseLeave={e => e.currentTarget.style.background = '#7c6aff'}
+          >+ {t('planner.addTask')}</button>
+        </div>
 
-          {/* AI FEEDBACK */}
-          {aiFeedback ? (
-            <div className="bg-[#7c6aff]/10 border border-[#7c6aff]/20 rounded-2xl p-5 mb-6 flex gap-4">
-              <div className="text-2xl">🤖</div>
-              <div className="flex-1">
-                <p className="text-[#9090c0] text-sm leading-relaxed">{aiFeedback}</p>
-                <button onClick={() => setAiFeedback('')} className="text-[#6666aa] text-xs mt-2 hover:text-white transition-colors">
-                  {t('planner.dismiss')}
-                </button>
+        {/* TAB SWITCHER */}
+        <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 4, display: 'inline-flex', gap: 4, marginBottom: 24 }}>
+          {[['today', t('planner.todayView')], ['week', t('planner.weeklyView')]].map(([tab, label]) => (
+            <button key={tab} onClick={() => setActiveTab(tab)} style={{
+              padding: '8px 20px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
+              background: activeTab === tab ? '#7c6aff' : 'transparent',
+              color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
+              boxShadow: activeTab === tab ? '0 2px 10px rgba(124,106,255,0.4)' : 'none',
+            }}>{label}</button>
+          ))}
+        </div>
+
+        {/* ══════════════ TODAY TAB ══════════════ */}
+        {activeTab === 'today' && (
+          <>
+            {/* PROGRESS CARD */}
+            <div style={{ ...GLASS, padding: '18px 22px', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div>
+                  <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{doneTasks} / {totalTasks} {t('planner.tasksDone')}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginLeft: 8 }}>{t('planner.today')}</span>
+                </div>
+                <span style={{ color: '#7c6aff', fontWeight: 800, fontSize: 18 }}>{completion}%</span>
+              </div>
+              <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${completion}%`, background: 'linear-gradient(90deg, #7c6aff, #a855f7)', borderRadius: 999, boxShadow: '0 0 8px rgba(124,106,255,0.6)', transition: 'width 0.7s ease' }} />
               </div>
             </div>
-          ) : (
-            <button
-              onClick={getAiFeedback}
-              disabled={loadingAi || totalTasks === 0}
-              className="w-full bg-[#12121a] border border-white/10 hover:border-[#7c6aff]/30 rounded-2xl p-4 mb-6 flex items-center justify-center gap-2 text-[#6666aa] hover:text-[#7c6aff] text-sm font-medium transition-all disabled:opacity-40"
-            >
-              {loadingAi ? '🤖 Thinking...' : `🤖 ${t('planner.getAiFeedback')}`}
-            </button>
-          )}
 
-          {/* TASKS LIST */}
-          {totalTasks === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24">
-              <div className="text-6xl mb-4">📋</div>
-              <p className="text-white font-bold text-xl mb-2">{t('planner.noTasks')}</p>
-              <p className="text-[#6666aa] text-sm mb-6">{t('planner.noTasksDesc')}</p>
+            {/* AI FEEDBACK */}
+            {aiFeedback ? (
+              <div style={{ ...GLASS_PURPLE, padding: '16px 20px', marginBottom: 16 }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(124,106,255,0.5),transparent)' }} />
+                <div style={{ display: 'flex', gap: 14, position: 'relative', zIndex: 1 }}>
+                  <div style={{ fontSize: 22, flexShrink: 0 }}>🤖</div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, lineHeight: 1.6 }}>{aiFeedback}</p>
+                    <button onClick={() => setAiFeedback('')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, marginTop: 8, cursor: 'pointer', padding: 0 }}>{t('planner.dismiss')}</button>
+                  </div>
+                </div>
+              </div>
+            ) : (
               <button
-                onClick={() => openModal()}
-                className="bg-[#7c6aff] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#6a58ee] transition-all"
-              >
-                + {t('planner.addTask')}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sortedTasks.map(task => {
-                const colors = categoryColors[task.category] || categoryColors.other
-                const priority = priorityConfig[task.priority]
-                const dur = calcDurationText(task.start_time, task.end_time)
-                return (
-                  <div
-                    key={task.id}
-                    className={`bg-[#12121a] border rounded-2xl p-4 flex items-center gap-4 transition-all group ${task.is_done ? 'border-white/5 opacity-60' : 'border-white/10 hover:border-white/20'
-                      }`}
-                  >
-                    <button
-                      onClick={() => handleToggle(task.id, null)}
-                      className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.is_done ? 'bg-[#43e97b] border-[#43e97b]' : 'border-white/20 hover:border-[#7c6aff]'
-                        }`}
+                onClick={getAiFeedback}
+                disabled={loadingAi || totalTasks === 0}
+                style={{ width: '100%', ...GLASS, borderRadius: 16, padding: '14px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'rgba(255,255,255,0.4)', fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s', opacity: (loadingAi || totalTasks === 0) ? 0.4 : 1 }}
+                onMouseEnter={e => { if (!loadingAi && totalTasks > 0) { e.currentTarget.style.borderColor = 'rgba(124,106,255,0.3)'; e.currentTarget.style.color = '#7c6aff' } }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+              >{loadingAi ? '🤖 Thinking...' : `🤖 ${t('planner.getAiFeedback')}`}</button>
+            )}
+
+            {/* TASKS LIST */}
+            {totalTasks === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+                <div style={{ fontSize: 60, marginBottom: 16 }}>📋</div>
+                <p style={{ color: '#fff', fontWeight: 700, fontSize: 20, marginBottom: 8 }}>{t('planner.noTasks')}</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 24 }}>{t('planner.noTasksDesc')}</p>
+                <button onClick={() => openModal()} style={{ background: '#7c6aff', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>+ {t('planner.addTask')}</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {sortedTasks.map(task => {
+                  const c = catColors[task.category] || catColors.other
+                  const p = priorityConfig[task.priority]
+                  const dur = calcDurationText(task.start_time, task.end_time)
+                  return (
+                    <div
+                      key={task.id}
+                      style={{
+                        ...GLASS, borderRadius: 18, padding: '14px 18px',
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        opacity: task.is_done ? 0.6 : 1, transition: 'all 0.2s',
+                        borderColor: task.is_done ? 'rgba(255,255,255,0.04)' : undefined,
+                      }}
+                      onMouseEnter={e => { if (!task.is_done) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)'; e.currentTarget.style.transform = 'translateX(2px)' } }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateX(0)' }}
                     >
-                      {task.is_done && <span className="text-white text-xs font-bold">✓</span>}
-                    </button>
-                    <div className="w-2 h-10 rounded-full flex-shrink-0" style={{ background: colors.dot }} />
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-medium text-sm ${task.is_done ? 'line-through text-[#6666aa]' : 'text-white'}`}>
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        {task.start_time && task.end_time
-                          ? <span className="text-[#6666aa] text-xs">🕐 {task.start_time.slice(0, 5)} → {task.end_time.slice(0, 5)}</span>
-                          : task.start_time
-                            ? <span className="text-[#6666aa] text-xs">🕐 {task.start_time.slice(0, 5)}</span>
-                            : null}
-                        {dur && <span className="text-[#6666aa] text-xs">⏱ {dur}</span>}
-                        {task.goal_title && <span className="text-[#7c6aff] text-xs">🎯 {task.goal_title}</span>}
+                      {/* Checkbox */}
+                      <button
+                        onClick={() => handleToggle(task.id, null)}
+                        style={{
+                          width: 24, height: 24, borderRadius: 8, flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: task.is_done ? 'linear-gradient(135deg,#43e97b,#26de81)' : 'transparent',
+                          border: task.is_done ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                          boxShadow: task.is_done ? '0 0 12px rgba(67,233,123,0.4)' : 'none',
+                          cursor: 'pointer', transition: 'all 0.2s', color: '#fff', fontSize: 11, fontWeight: 700,
+                        }}
+                        onMouseEnter={e => { if (!task.is_done) e.currentTarget.style.borderColor = '#7c6aff' }}
+                        onMouseLeave={e => { if (!task.is_done) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' }}
+                      >{task.is_done && '✓'}</button>
+
+                      {/* Category strip */}
+                      <div style={{ width: 3, height: 36, borderRadius: 4, background: c.dot, flexShrink: 0, boxShadow: `0 0 8px ${c.dot}60` }} />
+
+                      {/* Content */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 500, color: task.is_done ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: task.is_done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {task.title}
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                          {task.start_time && task.end_time ? <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>🕐 {task.start_time.slice(0, 5)} → {task.end_time.slice(0, 5)}</span> :
+                            task.start_time ? <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>🕐 {task.start_time.slice(0, 5)}</span> : null}
+                          {dur && <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>⏱ {dur}</span>}
+                          {task.goal_title && <span style={{ color: '#7c6aff', fontSize: 11 }}>🎯 {task.goal_title}</span>}
+                        </div>
+                      </div>
+
+                      {/* Badges */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        <span style={{ background: c.bg, color: c.color, fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8 }}>{t(`goals.categories.${task.category}`) || task.category}</span>
+                        <span style={{ background: p.bg, color: p.color, fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8 }}>{t(p.labelKey)}</span>
+                      </div>
+
+                      {/* Actions */}
+                      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                        <button onClick={() => openModal(task)} style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}>✏️</button>
+                        <button onClick={() => setDeleteId(task.id)} style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,107,107,0.15)'; e.currentTarget.style.color = '#ff6b6b' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}>🗑️</button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={`text-xs px-2 py-0.5 rounded-lg font-medium ${colors.bg} ${colors.text}`}>
-                        {t(`goals.categories.${task.category}`) || task.category}
-                      </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-lg font-medium ${priority.bg} ${priority.color}`}>
-                        {t(priority.labelKey)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <button
-                        onClick={() => openModal(task)}
-                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#6666aa] hover:text-white transition-all text-xs"
-                      >✏️</button>
-                      <button
-                        onClick={() => setDeleteId(task.id)}
-                        className="w-7 h-7 rounded-lg bg-white/5 hover:bg-red-500/20 flex items-center justify-center text-[#6666aa] hover:text-red-400 transition-all text-xs"
-                      >🗑️</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </>
-      )}
+                  )
+                })}
+              </div>
+            )}
+          </>
+        )}
 
-      {/* ══════════════ WEEKLY TAB ══════════════ */}
-      {activeTab === 'week' && (
-        <div>
-          {weekLoading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-[#7c6aff]">{t('common.loading')}</div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {weekDays.map((date) => {
-                const dateKey = toISO(date)
-                const dayPlan = weekPlans[dateKey]
-                const tasks = dayPlan?.tasks || []
-                const done = tasks.filter(tk => tk.is_done).length
-                const total = tasks.length
-                const pct = total > 0 ? Math.round((done / total) * 100) : 0
-                const isToday = dateKey === todayISO
-                const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
-                const isExpanded = expandedDay === dateKey
-                const sortedDay = tasks.slice().sort((a, b) => {
-                  if (a.start_time && b.start_time) return a.start_time.localeCompare(b.start_time)
-                  if (a.start_time) return -1
-                  if (b.start_time) return 1
-                  return 0
-                })
+        {/* ══════════════ WEEKLY TAB ══════════════ */}
+        {activeTab === 'week' && (
+          <div>
+            {weekLoading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+                <div style={{ color: '#7c6aff' }}>{t('common.loading')}</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {weekDays.map((date) => {
+                  const dateKey = toISO(date)
+                  const dayPlan = weekPlans[dateKey]
+                  const tasks = dayPlan?.tasks || []
+                  const done = tasks.filter(tk => tk.is_done).length
+                  const total = tasks.length
+                  const pct = total > 0 ? Math.round((done / total) * 100) : 0
+                  const isToday = dateKey === todayISO
+                  const isPast = date < new Date(new Date().setHours(0, 0, 0, 0))
+                  const isExpanded = expandedDay === dateKey
+                  const sortedDay = tasks.slice().sort((a, b) => {
+                    if (a.start_time && b.start_time) return a.start_time.localeCompare(b.start_time)
+                    if (a.start_time) return -1; if (b.start_time) return 1; return 0
+                  })
 
-                return (
-                  <div
-                    key={dateKey}
-                    className={`bg-[#12121a] border rounded-2xl overflow-hidden transition-all ${isToday
-                      ? 'border-[#7c6aff]/50 bg-[#7c6aff]/5'
-                      : isPast
-                        ? 'border-white/5 opacity-70'
-                        : 'border-white/10'
-                      }`}
-                  >
-                    {/* DAY HEADER — click to expand/collapse */}
-                    <div
-                      onClick={() => setExpandedDay(isExpanded ? null : dateKey)}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-white/2 transition-all text-left cursor-pointer"
-                    >
-                      {/* Day name + date */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-bold text-sm ${isToday ? 'text-[#7c6aff]' : 'text-white'}`}>
-                            {formatDayLabel(date)}
-                          </span>
-                          {isToday && (
-                            <span className="text-[10px] font-semibold bg-[#7c6aff] text-white px-1.5 py-0.5 rounded-md">
-                              {t('planner.today').toUpperCase()}
-                            </span>
+                  return (
+                    <div key={dateKey} style={{
+                      ...GLASS, borderRadius: 20, overflow: 'hidden', transition: 'all 0.2s', opacity: isPast ? 0.7 : 1,
+                      borderColor: isToday ? 'rgba(124,106,255,0.4)' : undefined,
+                      background: isToday ? 'rgba(124,106,255,0.05)' : undefined,
+                    }}>
+                      {/* DAY HEADER */}
+                      <div
+                        onClick={() => setExpandedDay(isExpanded ? null : dateKey)}
+                        style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px', cursor: 'pointer', transition: 'background 0.2s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontWeight: 700, fontSize: 14, color: isToday ? '#7c6aff' : '#fff' }}>{formatDayLabel(date)}</span>
+                            {isToday && <span style={{ fontSize: 10, fontWeight: 700, background: '#7c6aff', color: '#fff', padding: '2px 8px', borderRadius: 6 }}>{t('planner.today').toUpperCase()}</span>}
+                          </div>
+                          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>{formatShortDate(date)}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                          {total > 0 ? (
+                            <>
+                              <div style={{ width: 80, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${pct}%`, background: pct >= 70 ? '#43e97b' : pct >= 40 ? '#f7b731' : '#7c6aff', borderRadius: 999, transition: 'width 0.5s ease' }} />
+                              </div>
+                              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', width: 36, textAlign: 'right' }}>{pct}%</span>
+                              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', width: 40, textAlign: 'right' }}>{done}/{total}</span>
+                            </>
+                          ) : (
+                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{t('planner.noTasksDay')}</span>
+                          )}
+                          <button
+                            onClick={e => { e.stopPropagation(); openModal(null, dateKey) }}
+                            style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(124,106,255,0.15)', border: 'none', cursor: 'pointer', color: '#7c6aff', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,106,255,0.3)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,106,255,0.15)'}
+                          >+</button>
+                          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, transition: 'transform 0.2s', display: 'inline-block', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
+                        </div>
+                      </div>
+
+                      {/* EXPANDED */}
+                      {isExpanded && (
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 20px 16px' }}>
+                          {sortedDay.length === 0 ? (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+                              <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13 }}>{t('planner.noTasksDay')}</p>
+                              <button onClick={() => openModal(null, dateKey)} style={{ color: '#7c6aff', fontSize: 12, background: 'none', border: 'none', cursor: 'pointer' }}>+ {t('planner.addTaskDay')}</button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              {sortedDay.map(task => {
+                                const c = catColors[task.category] || catColors.other
+                                const p = priorityConfig[task.priority]
+                                return (
+                                  <div
+                                    key={task.id}
+                                    style={{
+                                      display: 'flex', alignItems: 'center', gap: 10,
+                                      padding: '10px 12px', borderRadius: 14,
+                                      opacity: task.is_done ? 0.5 : 1, transition: 'background 0.2s',
+                                    }}
+                                    onMouseEnter={e => { if (!task.is_done) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    <button
+                                      onClick={() => handleToggle(task.id, dateKey)}
+                                      style={{
+                                        width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        background: task.is_done ? 'linear-gradient(135deg,#43e97b,#26de81)' : 'transparent',
+                                        border: task.is_done ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                                        boxShadow: task.is_done ? '0 0 10px rgba(67,233,123,0.4)' : 'none',
+                                        cursor: 'pointer', color: '#fff', fontSize: 10, fontWeight: 700,
+                                      }}
+                                    >{task.is_done && '✓'}</button>
+                                    <div style={{ width: 3, height: 30, borderRadius: 4, background: c.dot, flexShrink: 0 }} />
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <p style={{ fontSize: 13, fontWeight: 500, color: task.is_done ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: task.is_done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {task.title}
+                                      </p>
+                                      {(task.start_time || task.goal_title) && (
+                                        <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+                                          {task.start_time && task.end_time ? <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>🕐 {task.start_time.slice(0, 5)} → {task.end_time.slice(0, 5)}</span> :
+                                            task.start_time ? <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>🕐 {task.start_time.slice(0, 5)}</span> : null}
+                                          {task.goal_title && <span style={{ color: '#7c6aff', fontSize: 11 }}>🎯 {task.goal_title}</span>}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <span style={{ background: c.bg, color: c.color, fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 6, flexShrink: 0 }}>{t(`goals.categories.${task.category}`) || task.category}</span>
+                                    <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                                      <button onClick={() => openModal(task, dateKey)} style={{ width: 24, height: 24, borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✏️</button>
+                                      <button onClick={() => setDeleteId(task.id)} style={{ width: 24, height: 24, borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🗑️</button>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                              <button onClick={() => openModal(null, dateKey)} style={{ width: '100%', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 12, padding: '8px 0', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+                                onMouseEnter={e => e.currentTarget.style.color = '#7c6aff'}
+                                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                              >+ {t('planner.addTaskDay')}</button>
+                            </div>
                           )}
                         </div>
-                        <span className="text-[#6666aa] text-xs">{formatShortDate(date)}</span>
-                      </div>
-
-                      {/* Mini progress bar */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        {total > 0 ? (
-                          <>
-                            <div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${pct}%`,
-                                  background: pct >= 70 ? '#43e97b' : pct >= 40 ? '#f7b731' : '#7c6aff'
-                                }}
-                              />
-                            </div>
-                            <span className="text-xs text-[#6666aa] w-10 text-right">{pct}%</span>
-                          </>
-                        ) : (
-                          <span className="text-xs text-[#444466]">{t('planner.noTasksDay')}</span>
-                        )}
-                        <span className="text-[#6666aa] text-xs w-14 text-right">
-                          {total > 0 ? `${done}/${total}` : ''}
-                        </span>
-                        {/* Add task button */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); openModal(null, dateKey) }}
-                          className="w-7 h-7 rounded-lg bg-[#7c6aff]/15 hover:bg-[#7c6aff]/30 flex items-center justify-center text-[#7c6aff] text-sm font-bold transition-all"
-                          title={t('planner.addTaskDay')}
-                        >+</button>
-                        {/* Chevron */}
-                        <span className={`text-[#444466] text-xs transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-                          ▼
-                        </span>
-                      </div>
+                      )}
                     </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
-                    {/* EXPANDED TASK LIST */}
-                    {isExpanded && (
-                      <div className="border-t border-white/5 px-4 pb-4 pt-3">
-                        {sortedDay.length === 0 ? (
-                          <div className="flex items-center justify-between py-3">
-                            <p className="text-[#444466] text-sm">{t('planner.noTasksDay')}</p>
-                            <button
-                              onClick={() => openModal(null, dateKey)}
-                              className="text-[#7c6aff] text-xs hover:underline"
-                            >
-                              + {t('planner.addTaskDay')}
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            {sortedDay.map(task => {
-                              const colors = categoryColors[task.category] || categoryColors.other
-                              const priority = priorityConfig[task.priority]
-                              return (
-                                <div
-                                  key={task.id}
-                                  className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all group ${task.is_done ? 'opacity-50' : 'hover:bg-white/3'
-                                    }`}
-                                >
-                                  {/* Checkbox */}
-                                  <button
-                                    onClick={() => handleToggle(task.id, dateKey)}
-                                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${task.is_done ? 'bg-[#43e97b] border-[#43e97b]' : 'border-white/20 hover:border-[#7c6aff]'
-                                      }`}
-                                  >
-                                    {task.is_done && <span className="text-white text-[10px] font-bold">✓</span>}
-                                  </button>
-
-                                  {/* Color dot */}
-                                  <div className="w-1.5 h-8 rounded-full flex-shrink-0" style={{ background: colors.dot }} />
-
-                                  {/* Info */}
-                                  <div className="flex-1 min-w-0">
-                                    <p className={`text-sm font-medium truncate ${task.is_done ? 'line-through text-[#6666aa]' : 'text-white'}`}>
-                                      {task.title}
-                                    </p>
-                                    {(task.start_time || task.goal_title) && (
-                                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                        {task.start_time && task.end_time
-                                          ? <span className="text-[#6666aa] text-xs">🕐 {task.start_time.slice(0, 5)} → {task.end_time.slice(0, 5)}</span>
-                                          : task.start_time
-                                            ? <span className="text-[#6666aa] text-xs">🕐 {task.start_time.slice(0, 5)}</span>
-                                            : null}
-                                        {task.goal_title && <span className="text-[#7c6aff] text-xs">🎯 {task.goal_title}</span>}
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Category badge */}
-                                  <span className={`text-xs px-2 py-0.5 rounded-lg font-medium flex-shrink-0 ${colors.bg} ${colors.text}`}>
-                                    {t(`goals.categories.${task.category}`) || task.category}
-                                  </span>
-
-                                  {/* Actions */}
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
-                                    <button
-                                      onClick={() => openModal(task, dateKey)}
-                                      className="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#6666aa] hover:text-white transition-all text-xs"
-                                    >✏️</button>
-                                    <button
-                                      onClick={() => setDeleteId(task.id)}
-                                      className="w-6 h-6 rounded-lg bg-white/5 hover:bg-red-500/20 flex items-center justify-center text-[#6666aa] hover:text-red-400 transition-all text-xs"
-                                    >🗑️</button>
-                                  </div>
-                                </div>
-                              )
-                            })}
-
-                            {/* Add more link */}
-                            <button
-                              onClick={() => openModal(null, dateKey)}
-                              className="w-full text-center text-[#6666aa] hover:text-[#7c6aff] text-xs py-2 transition-colors"
-                            >
-                              + {t('planner.addTaskDay')}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
+        {/* ══════════════ ADD / EDIT MODAL ══════════════ */}
+        {showModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+            <div style={{ ...GLASS, padding: 24, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }}>
+              <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 17, marginBottom: 20 }}>{editTask ? t('common.edit') : t('planner.addTask')}</h2>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('common.title', 'Title')}</label>
+                  <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required placeholder="e.g. University lecture" style={INPUT}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(124,106,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(124,106,255,0.1)' }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('planner.category')}</label>
+                    <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={INPUT}>
+                      {['study', 'fitness', 'personal', 'work', 'health', 'finance', 'break', 'other'].map(cat => (<option key={cat} value={cat}>{t(`goals.categories.${cat}`) || cat}</option>))}
+                    </select>
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ══════════════ ADD / EDIT MODAL ══════════════ */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-white font-bold text-lg mb-5">
-              {editTask ? t('common.edit') : t('planner.addTask')}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* TITLE */}
-              <div>
-                <label className="text-sm text-[#6666aa] mb-1.5 block">{t('common.title', 'Title')}</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  required
-                  placeholder="e.g. University lecture"
-                  className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#444466] focus:outline-none focus:border-[#7c6aff] transition-colors"
-                />
-              </div>
-
-              {/* CATEGORY + PRIORITY */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-[#6666aa] mb-1.5 block">{t('planner.category')}</label>
-                  <select
-                    value={form.category}
-                    onChange={e => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7c6aff] transition-colors"
-                  >
-                    {['study', 'fitness', 'personal', 'work', 'health', 'finance', 'break', 'other'].map(cat => (
-                      <option key={cat} value={cat}>{t(`goals.categories.${cat}`) || cat}</option>
-                    ))}
-                  </select>
+                  <div>
+                    <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('planner.priority')}</label>
+                    <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })} style={INPUT}>
+                      <option value="high">{t('planner.priorities.high')}</option>
+                      <option value="medium">{t('planner.priorities.medium')}</option>
+                      <option value="low">{t('planner.priorities.low')}</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm text-[#6666aa] mb-1.5 block">{t('planner.priority')}</label>
-                  <select
-                    value={form.priority}
-                    onChange={e => setForm({ ...form, priority: e.target.value })}
-                    className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7c6aff] transition-colors"
-                  >
-                    <option value="high">{t('planner.priorities.high')}</option>
-                    <option value="medium">{t('planner.priorities.medium')}</option>
-                    <option value="low">{t('planner.priorities.low')}</option>
-                  </select>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('planner.startTime')} <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>({t('auth.optional')})</span></label>
+                    <input type="time" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} style={{ ...INPUT, colorScheme: 'dark' }} />
+                  </div>
+                  <div>
+                    <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('planner.endTime')} <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>({t('auth.optional')})</span></label>
+                    <input type="time" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} style={{ ...INPUT, colorScheme: 'dark' }} />
+                  </div>
                 </div>
-              </div>
-
-              {/* START + END TIME */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-[#6666aa] mb-1.5 block">
-                    {t('planner.startTime')} <span className="text-[#444466] text-xs">({t('auth.optional')})</span>
-                  </label>
-                  <input
-                    type="time"
-                    value={form.start_time}
-                    onChange={e => setForm({ ...form, start_time: e.target.value })}
-                    className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7c6aff] transition-colors"
-                  />
+                {durationText ? (
+                  <div style={{ background: 'rgba(124,106,255,0.1)', border: '1px solid rgba(124,106,255,0.2)', borderRadius: 12, padding: '10px 16px', fontSize: 13, color: '#7c6aff' }}>⏱ {t('planner.duration')}: {durationText}</div>
+                ) : form.start_time && form.end_time ? (
+                  <div style={{ background: 'rgba(255,107,107,0.1)', border: '1px solid rgba(255,107,107,0.2)', borderRadius: 12, padding: '10px 16px', fontSize: 13, color: '#ff6b6b' }}>⚠️ {t('planner.endTimeError', 'End time must be after start time')}</div>
+                ) : null}
+                {goals.length > 0 && (
+                  <div>
+                    <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('planner.linkGoal')} <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11 }}>({t('auth.optional')})</span></label>
+                    <select value={form.goal} onChange={e => setForm({ ...form, goal: e.target.value })} style={INPUT}>
+                      <option value="">{t('planner.noGoal')}</option>
+                      {goals.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+                    </select>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 12, paddingTop: 4 }}>
+                  <button type="button" onClick={closeModal} style={{ flex: 1, padding: '12px 0', borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>{t('common.cancel')}</button>
+                  <button type="submit" style={{ flex: 1, padding: '12px 0', borderRadius: 12, background: '#7c6aff', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(124,106,255,0.35)' }}>{editTask ? t('common.save') : t('common.add')}</button>
                 </div>
-                <div>
-                  <label className="text-sm text-[#6666aa] mb-1.5 block">
-                    {t('planner.endTime')} <span className="text-[#444466] text-xs">({t('auth.optional')})</span>
-                  </label>
-                  <input
-                    type="time"
-                    value={form.end_time}
-                    onChange={e => setForm({ ...form, end_time: e.target.value })}
-                    className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7c6aff] transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* DURATION PREVIEW */}
-              {durationText ? (
-                <div className="bg-[#7c6aff]/10 border border-[#7c6aff]/20 rounded-xl px-4 py-2.5 text-sm text-[#7c6aff]">
-                  ⏱ {t('planner.duration')}: {durationText}
-                </div>
-              ) : form.start_time && form.end_time ? (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5 text-sm text-red-400">
-                  ⚠️ {t('planner.endTimeError', 'End time must be after start time')}
-                </div>
-              ) : null}
-
-              {/* LINK TO GOAL */}
-              {goals.length > 0 && (
-                <div>
-                  <label className="text-sm text-[#6666aa] mb-1.5 block">
-                    {t('planner.linkGoal')} <span className="text-[#444466] text-xs">({t('auth.optional')})</span>
-                  </label>
-                  <select
-                    value={form.goal}
-                    onChange={e => setForm({ ...form, goal: e.target.value })}
-                    className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#7c6aff] transition-colors"
-                  >
-                    <option value="">{t('planner.noGoal')}</option>
-                    {goals.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {/* BUTTONS */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 py-3 rounded-xl border border-white/10 text-[#6666aa] hover:text-white text-sm font-medium transition-all"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-xl bg-[#7c6aff] hover:bg-[#6a58ee] text-white text-sm font-semibold transition-all"
-                >
-                  {editTask ? t('common.save') : t('common.add')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════ DELETE MODAL ══════════════ */}
-      {deleteId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6 w-full max-w-sm">
-            <div className="text-center mb-6">
-              <div className="text-5xl mb-4">🗑️</div>
-              <h2 className="text-white font-bold text-lg mb-2">{t('delete.taskTitle')}</h2>
-              <p className="text-[#6666aa] text-sm">{t('delete.taskDesc')}</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="flex-1 py-3 rounded-xl border border-white/10 text-[#6666aa] hover:text-white text-sm font-medium transition-all"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                className="flex-1 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-sm font-semibold transition-all"
-              >
-                {t('common.delete')}
-              </button>
+              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
+        {/* ══════════════ DELETE MODAL ══════════════ */}
+        {deleteId && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+            <div style={{ ...GLASS, padding: 24, width: '100%', maxWidth: 360, textAlign: 'center' }}>
+              <div style={{ fontSize: 52, marginBottom: 16 }}>🗑️</div>
+              <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 17, marginBottom: 8 }}>{t('delete.taskTitle')}</h2>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 24 }}>{t('delete.taskDesc')}</p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button onClick={() => setDeleteId(null)} style={{ flex: 1, padding: '12px 0', borderRadius: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>{t('common.cancel')}</button>
+                <button onClick={() => handleDelete(deleteId)} style={{ flex: 1, padding: '12px 0', borderRadius: 12, background: 'rgba(255,107,107,0.15)', border: '1px solid rgba(255,107,107,0.3)', color: '#ff6b6b', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>{t('common.delete')}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import BlobBackground from '../components/BlobBackground'
 
 export default function Login() {
   const { login } = useAuth()
@@ -30,76 +31,87 @@ export default function Login() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#7c6aff] opacity-10 blur-[120px] rounded-full pointer-events-none" />
+  const INPUT = {
+    width: '100%', background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14,
+    padding: '12px 16px', color: '#fff', fontSize: 14,
+    outline: 'none', fontFamily: 'inherit',
+  }
 
-      {/* Language switcher top right */}
-      <div className="absolute top-6 right-6">
+  return (
+    <div style={{ minHeight: '100vh', background: '#06060d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', position: 'relative' }}>
+      <BlobBackground />
+
+      {/* Language switcher */}
+      <div style={{ position: 'absolute', top: 24, right: 24, zIndex: 2 }}>
         <LanguageSwitcher />
       </div>
 
-      <div className="w-full max-w-md relative">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#7c6aff] rounded-2xl mb-4 shadow-lg shadow-[#7c6aff]/30">
-            <span className="text-2xl">🧠</span>
-          </div>
-          <h1 className="text-3xl font-bold text-white">
-            Flow<span className="text-[#7c6aff]">Mind</span>
+      <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
+
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: 56, height: 56, borderRadius: 16, background: '#7c6aff',
+            boxShadow: '0 0 24px rgba(124,106,255,0.5)', fontSize: 26, marginBottom: 16,
+          }}>🧠</div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff', margin: 0 }}>
+            Flow<span style={{ color: '#7c6aff' }}>Mind</span>
           </h1>
-          <p className="text-[#6666aa] mt-1 text-sm">{t('common.tagline')}</p>
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginTop: 6 }}>{t('common.tagline')}</p>
         </div>
 
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-8">
-          <h2 className="text-xl font-bold text-white mb-6">{t('auth.welcomeBack')}</h2>
+        {/* Card */}
+        <div style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)',
+          borderRadius: 24, padding: 32,
+        }}>
+          <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 20, marginBottom: 24 }}>{t('auth.welcomeBack')}</h2>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl px-4 py-3 mb-5 text-sm">
+            <div style={{ background: 'rgba(255,107,107,0.1)', border: '1px solid rgba(255,107,107,0.25)', color: '#ff6b6b', borderRadius: 12, padding: '12px 16px', marginBottom: 20, fontSize: 13 }}>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('auth.email')}</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#444466] focus:outline-none focus:border-[#7c6aff] transition-colors"
-              />
+              <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('auth.email')}</label>
+              <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required style={INPUT}
+                onFocus={e => { e.target.style.borderColor = 'rgba(124,106,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(124,106,255,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none' }} />
             </div>
 
             <div>
-              <label className="text-sm text-[#6666aa] mb-1.5 block">{t('auth.password')}</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="w-full bg-[#1a1a26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#444466] focus:outline-none focus:border-[#7c6aff] transition-colors"
-              />
+              <label style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'block', marginBottom: 6 }}>{t('auth.password')}</label>
+              <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="••••••••" required style={INPUT}
+                onFocus={e => { e.target.style.borderColor = 'rgba(124,106,255,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(124,106,255,0.1)' }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.boxShadow = 'none' }} />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#7c6aff] hover:bg-[#6a58ee] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-3 transition-all duration-200 shadow-lg shadow-[#7c6aff]/25 mt-2"
+              style={{
+                width: '100%', background: '#7c6aff', color: '#fff',
+                border: 'none', borderRadius: 12, padding: '13px 0',
+                fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 4,
+                boxShadow: '0 4px 16px rgba(124,106,255,0.35)',
+                opacity: loading ? 0.5 : 1, transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.background = '#6a58ee' }}
+              onMouseLeave={e => e.currentTarget.style.background = '#7c6aff'}
             >
               {loading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
           </form>
 
-          <p className="text-center text-sm text-[#6666aa] mt-6">
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 24, marginBottom: 0 }}>
             {t('auth.noAccount')}{' '}
-            <Link to="/register" className="text-[#7c6aff] hover:underline font-medium">
-              {t('auth.createOne')}
-            </Link>
+            <Link to="/register" style={{ color: '#7c6aff', fontWeight: 600, textDecoration: 'none' }}>{t('auth.createOne')}</Link>
           </p>
         </div>
       </div>

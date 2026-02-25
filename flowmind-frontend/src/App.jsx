@@ -24,9 +24,9 @@ function PrivateRoute({ children }) {
 
 function AppLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-[#0a0a0f]">
+    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#06060d' }}>
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main style={{ flex: 1, overflowY: 'auto', height: '100%' }}>
         {children}
       </main>
     </div>

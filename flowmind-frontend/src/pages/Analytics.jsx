@@ -2,11 +2,28 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../i18n'
 import api from '../api/axios'
+import BlobBackground from '../components/BlobBackground'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, LineChart, Line,
-  CartesianGrid, Area, AreaChart
+  ResponsiveContainer, CartesianGrid, Area, AreaChart
 } from 'recharts'
+
+const GLASS = {
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  backdropFilter: 'blur(30px)',
+  WebkitBackdropFilter: 'blur(30px)',
+  borderRadius: 24,
+}
+const GLASS_PURPLE = {
+  background: 'rgba(124,106,255,0.06)',
+  border: '1px solid rgba(124,106,255,0.15)',
+  backdropFilter: 'blur(30px)',
+  WebkitBackdropFilter: 'blur(30px)',
+  borderRadius: 24,
+  position: 'relative',
+  overflow: 'hidden',
+}
 
 export default function Analytics() {
   const { t } = useTranslation()
@@ -17,9 +34,7 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('weekly')
 
-  useEffect(() => {
-    fetchAll()
-  }, [])
+  useEffect(() => { fetchAll() }, [])
 
   const fetchAll = async () => {
     try {
@@ -29,11 +44,7 @@ export default function Analytics() {
       ])
       setWeeklyStats(weekRes.data)
       setMonthlyStats(monthRes.data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err) { console.error(err) } finally { setLoading(false) }
   }
 
   const getAiSummary = async () => {
@@ -41,21 +52,26 @@ export default function Analytics() {
     try {
       const res = await api.get('/api/analytics/weekly/summary/')
       setAiSummary(res.data.summary)
-    } catch {
-      setAiSummary('Could not generate summary. Try again later.')
-    } finally {
-      setLoadingAi(false)
-    }
+    } catch { setAiSummary('Could not generate summary. Try again later.') }
+    finally { setLoadingAi(false) }
   }
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#1a1a26] border border-white/10 rounded-xl px-3 py-2 text-xs">
-          <p className="text-white font-semibold mb-1">{label}</p>
-          {payload.map((p, i) => (
-            <p key={i} style={{ color: p.color }}>{p.name}: {p.value}{p.name.includes('Rate') ? '%' : ''}</p>
-          ))}
+        <div style={{ background: 'rgba(18,18,26,0.97)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 14px', fontSize: 13 }}>
+          <p style={{ color: '#fff', fontWeight: 700, marginBottom: 6 }}>{label}</p>
+          {payload.map((p, i) => {
+            // Always use a legible color — completed=green, total=white, rate=green
+            const color = p.dataKey === 'completed_tasks' || p.name?.toLowerCase().includes('completed') ? '#43e97b'
+              : p.name?.toLowerCase().includes('rate') ? '#43e97b'
+                : '#fff'
+            return (
+              <p key={i} style={{ color, marginBottom: 2, fontWeight: 500 }}>
+                {p.name}: <span style={{ fontWeight: 700 }}>{p.value}{p.name?.includes('Rate') ? '%' : ''}</span>
+              </p>
+            )
+          })}
         </div>
       )
     }
@@ -63,296 +79,171 @@ export default function Analytics() {
   }
 
   const stats = activeTab === 'weekly' ? weeklyStats : monthlyStats
-
-  // Translate day names coming from the backend (always English abbreviations)
-  const translateDayName = (dayName) => {
-    const key = `days.${dayName}`
-    const translated = i18n.t(key)
-    return translated === key ? dayName : translated  // fallback to original if key missing
-  }
-
-  const chartData = (stats?.days || []).map(day => ({
-    ...day,
-    day_name: translateDayName(day.day_name),
-  }))
+  const translateDayName = (dayName) => { const key = `days.${dayName}`; const translated = i18n.t(key); return translated === key ? dayName : translated }
+  const chartData = (stats?.days || []).map(day => ({ ...day, day_name: translateDayName(day.day_name) }))
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-      <div className="text-[#7c6aff]">Loading...</div>
+    <div style={{ minHeight: '100vh', background: '#06060d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <BlobBackground /><div style={{ color: '#7c6aff', position: 'relative', zIndex: 1 }}>Loading...</div>
     </div>
   )
 
+  const rate = stats?.summary?.completion_rate || 0
+  const rateColor = rate >= 70 ? '#43e97b' : rate >= 40 ? '#f7b731' : '#ff6b6b'
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] p-6 md:p-8">
+    <div style={{ minHeight: '100vh', background: '#06060d', padding: 32, position: 'relative' }}>
+      <BlobBackground />
+      <div style={{ position: 'relative', zIndex: 1 }}>
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">{t('analytics.title')}</h1>
-          <p className="text-[#6666aa] text-sm mt-1">{t('analytics.trackDesc')}</p>
-        </div>
-
-        {/* TAB SWITCHER */}
-        <div className="bg-[#12121a] border border-white/10 rounded-xl p-1 flex gap-1">
-          <button
-            onClick={() => setActiveTab('weekly')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'weekly'
-              ? 'bg-[#7c6aff] text-white'
-              : 'text-[#6666aa] hover:text-white'
-              }`}
-          >
-            {t('analytics.weeklyStats')}
-          </button>
-          <button
-            onClick={() => setActiveTab('monthly')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'monthly'
-              ? 'bg-[#7c6aff] text-white'
-              : 'text-[#6666aa] hover:text-white'
-              }`}
-          >
-            {t('analytics.monthlyStats')}
-          </button>
-        </div>
-      </div>
-
-      {/* SUMMARY STATS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
-          <div className="text-2xl mb-2">✅</div>
-          <div className="text-2xl font-bold text-white">
-            {stats?.summary?.completed_tasks || 0}
+        {/* HEADER */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>{t('analytics.title')}</h1>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 4 }}>{t('analytics.trackDesc')}</p>
           </div>
-          <div className="text-[#6666aa] text-xs mt-1">{t('analytics.completionRate')}</div>
-          <div className="text-[#444466] text-xs">{t('common.of', 'of')} {stats?.summary?.total_tasks || 0} {t('analytics.totalTasks').toLowerCase()}</div>
-        </div>
-
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
-          <div className="text-2xl mb-2">🔥</div>
-          <div className="text-2xl font-bold text-white">
-            {stats?.summary?.completion_rate || 0}%
-          </div>
-          <div className="text-[#6666aa] text-xs mt-1">{t('analytics.completionRate')}</div>
-          <div className={`text-xs mt-1 font-medium ${(stats?.summary?.completion_rate || 0) >= 70
-            ? 'text-[#43e97b]'
-            : (stats?.summary?.completion_rate || 0) >= 40
-              ? 'text-[#f7b731]'
-              : 'text-red-400'
-            }`}>
-            {(stats?.summary?.completion_rate || 0) >= 70 ? t('analytics.excellent') :
-              (stats?.summary?.completion_rate || 0) >= 40 ? t('analytics.good') : t('analytics.keepGoing')}
+          {/* TAB SWITCHER */}
+          <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 4, display: 'flex', gap: 4 }}>
+            {[['weekly', t('analytics.weeklyStats')], ['monthly', t('analytics.monthlyStats')]].map(([tab, label]) => (
+              <button key={tab} onClick={() => setActiveTab(tab)} style={{
+                padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s',
+                background: activeTab === tab ? '#7c6aff' : 'transparent',
+                color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
+                boxShadow: activeTab === tab ? '0 2px 10px rgba(124,106,255,0.4)' : 'none',
+              }}>{label}</button>
+            ))}
           </div>
         </div>
 
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
-          <div className="text-2xl mb-2">⏱️</div>
-          <div className="text-2xl font-bold text-white">
-            {stats?.summary?.total_focus_hours || 0}h
-          </div>
-          <div className="text-[#6666aa] text-xs mt-1">{t('analytics.focusHours')}</div>
-        </div>
-
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-5">
-          <div className="text-2xl mb-2">⭐</div>
-          <div className="text-2xl font-bold text-white truncate">
-            {stats?.summary?.best_day ? translateDayName(stats.summary.best_day) : '—'}
-          </div>
-          <div className="text-[#6666aa] text-xs mt-1">{t('analytics.bestDay')}</div>
-        </div>
-      </div>
-
-      {/* CHARTS ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-        {/* COMPLETION RATE CHART */}
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-5">{t('analytics.completionRate')}</h3>
-          {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              {t('analytics.noData')}
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7c6aff" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#7c6aff" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis
-                  dataKey="day_name"
-                  tick={{ fill: '#6666aa', fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fill: '#6666aa', fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  domain={[0, 100]}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="completion_rate"
-                  name="Completion Rate"
-                  stroke="#7c6aff"
-                  strokeWidth={2}
-                  fill="url(#colorRate)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* TASKS BAR CHART */}
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-5">{t('analytics.tasksOverview')}</h3>
-          {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              {t('analytics.noData')}
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis
-                  dataKey="day_name"
-                  tick={{ fill: '#6666aa', fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fill: '#6666aa', fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="total_tasks" name="Total" fill="rgba(124,106,255,0.3)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="completed_tasks" name="Completed" fill="#7c6aff" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* FOCUS HOURS CHART */}
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-5">{t('analytics.focusHours')}</h3>
-          {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              {t('analytics.noData')}
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorFocus" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#43e97b" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#43e97b" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis
-                  dataKey="day_name"
-                  tick={{ fill: '#6666aa', fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fill: '#6666aa', fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="focus_hours"
-                  name="Focus Hours"
-                  stroke="#43e97b"
-                  strokeWidth={2}
-                  fill="url(#colorFocus)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* DAILY BREAKDOWN */}
-        <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-          <h3 className="text-white font-bold mb-5">{t('analytics.dailyBreakdown')}</h3>
-          {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-[#6666aa] text-sm">
-              {t('analytics.noData')}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {chartData.slice(-7).map((day, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="text-[#6666aa] text-xs w-8 flex-shrink-0">{day.day_name}</span>
-                  <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${day.completion_rate}%`,
-                        background: day.completion_rate >= 70
-                          ? '#43e97b'
-                          : day.completion_rate >= 40
-                            ? '#f7b731'
-                            : '#7c6aff'
-                      }}
-                    />
-                  </div>
-                  <span className="text-white text-xs font-medium w-10 text-right flex-shrink-0">
-                    {day.completion_rate}%
-                  </span>
-                  <span className="text-[#6666aa] text-xs w-14 text-right flex-shrink-0">
-                    {day.completed_tasks}/{day.total_tasks} {t('analytics.totalTasks').toLowerCase()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* AI WEEKLY SUMMARY */}
-      <div className="bg-[#12121a] border border-white/10 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#7c6aff] rounded-xl flex items-center justify-center text-lg">
-              🤖
-            </div>
-            <h3 className="text-white font-bold">{t('analytics.weeklySummary')}</h3>
-          </div>
-          {!aiSummary && (
-            <button
-              onClick={getAiSummary}
-              disabled={loadingAi}
-              className="bg-[#7c6aff]/15 hover:bg-[#7c6aff]/25 border border-[#7c6aff]/30 text-[#7c6aff] text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
+        {/* STATS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          {[
+            { icon: '✅', value: stats?.summary?.completed_tasks || 0, label: t('analytics.completionRate'), sub: `${t('common.of', 'of')} ${stats?.summary?.total_tasks || 0} ${t('analytics.totalTasks').toLowerCase()}`, accent: '#7c6aff' },
+            { icon: '🔥', value: `${rate}%`, label: t('analytics.completionRate'), sub: rate >= 70 ? t('analytics.excellent') : rate >= 40 ? t('analytics.good') : t('analytics.keepGoing'), accent: rateColor, subColor: rateColor },
+            { icon: '⏱️', value: `${stats?.summary?.total_focus_hours || 0}h`, label: t('analytics.focusHours'), accent: '#4fc3f7' },
+            { icon: '⭐', value: stats?.summary?.best_day ? translateDayName(stats.summary.best_day) : '—', label: t('analytics.bestDay'), accent: '#43e97b' },
+          ].map((s, i) => (
+            <div key={i} style={{ ...GLASS, borderRadius: 20, padding: '20px 22px', position: 'relative', overflow: 'hidden', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
             >
-              {loadingAi ? '🤖 Thinking...' : t('analytics.getAiSummary')}
-            </button>
-          )}
-          {aiSummary && (
-            <button
-              onClick={() => setAiSummary('')}
-              className="text-[#6666aa] hover:text-white text-xs transition-all"
-            >
-              {t('analytics.refresh', 'Refresh')}
-            </button>
-          )}
+              <div style={{ fontSize: 22, marginBottom: 8 }}>{s.icon}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.3px' }}>{s.label}</div>
+              {s.sub && <div style={{ fontSize: 11, color: s.subColor || 'rgba(255,255,255,0.3)', marginTop: 2, fontWeight: s.subColor ? 600 : 400 }}>{s.sub}</div>}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: s.accent, borderRadius: '0 0 20px 20px' }} />
+            </div>
+          ))}
         </div>
 
-        {aiSummary ? (
-          <p className="text-[#9090c0] text-sm leading-relaxed">{aiSummary}</p>
-        ) : (
-          <p className="text-[#6666aa] text-sm">
-            {t('analytics.aiSummaryHint')}
-          </p>
-        )}
-      </div>
+        {/* CHARTS */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+          {/* COMPLETION RATE */}
+          <div style={{ ...GLASS, padding: 24 }}>
+            <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.completionRate')}</h3>
+            {chartData.length === 0 ? (
+              <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>{t('analytics.noData')}</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={chartData}>
+                  <defs><linearGradient id="cRate" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#7c6aff" stopOpacity={0.3} /><stop offset="95%" stopColor="#7c6aff" stopOpacity={0} /></linearGradient></defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="day_name" tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="completion_rate" name="Completion Rate" stroke="#7c6aff" strokeWidth={2} fill="url(#cRate)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
 
+          {/* TASKS BAR */}
+          <div style={{ ...GLASS, padding: 24 }}>
+            <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.tasksOverview')}</h3>
+            {chartData.length === 0 ? (
+              <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>{t('analytics.noData')}</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={chartData} barGap={4}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="day_name" tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="total_tasks" name="Total" fill="rgba(124,106,255,0.2)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="completed_tasks" name="Completed" fill="#7c6aff" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* FOCUS HOURS */}
+          <div style={{ ...GLASS, padding: 24 }}>
+            <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.focusHours')}</h3>
+            {chartData.length === 0 ? (
+              <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>{t('analytics.noData')}</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={chartData}>
+                  <defs><linearGradient id="cFocus" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#43e97b" stopOpacity={0.3} /><stop offset="95%" stopColor="#43e97b" stopOpacity={0} /></linearGradient></defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="day_name" tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="focus_hours" name="Focus Hours" stroke="#43e97b" strokeWidth={2} fill="url(#cFocus)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* DAILY BREAKDOWN */}
+          <div style={{ ...GLASS, padding: 24 }}>
+            <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.dailyBreakdown')}</h3>
+            {chartData.length === 0 ? (
+              <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>{t('analytics.noData')}</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {chartData.slice(-7).map((day, i) => {
+                  const barColor = day.completion_rate >= 70 ? '#43e97b' : day.completion_rate >= 40 ? '#f7b731' : '#7c6aff'
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, width: 32, flexShrink: 0 }}>{day.day_name}</span>
+                      <div style={{ flex: 1, height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${day.completion_rate}%`, background: barColor, borderRadius: 999, boxShadow: `0 0 6px ${barColor}60`, transition: 'width 0.7s ease' }} />
+                      </div>
+                      <span style={{ color: '#fff', fontSize: 11, fontWeight: 500, width: 36, textAlign: 'right', flexShrink: 0 }}>{day.completion_rate}%</span>
+                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, width: 52, textAlign: 'right', flexShrink: 0 }}>{day.completed_tasks}/{day.total_tasks}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* AI WEEKLY SUMMARY */}
+        <div style={{ ...GLASS_PURPLE, padding: 24 }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(124,106,255,0.5),transparent)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 12, background: '#7c6aff', boxShadow: '0 0 20px rgba(124,106,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🤖</div>
+              <h3 style={{ color: '#fff', fontWeight: 700 }}>{t('analytics.weeklySummary')}</h3>
+            </div>
+            {!aiSummary ? (
+              <button onClick={getAiSummary} disabled={loadingAi} style={{ background: 'rgba(124,106,255,0.15)', border: '1px solid rgba(124,106,255,0.3)', color: '#7c6aff', fontSize: 12, fontWeight: 600, padding: '8px 16px', borderRadius: 10, cursor: 'pointer', opacity: loadingAi ? 0.5 : 1 }}>{loadingAi ? '🤖 Thinking...' : t('analytics.getAiSummary')}</button>
+            ) : (
+              <button onClick={() => setAiSummary('')} style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>{t('analytics.refresh', 'Refresh')}</button>
+            )}
+          </div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            {aiSummary ? (
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, lineHeight: 1.7 }}>{aiSummary}</p>
+            ) : (
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>{t('analytics.aiSummaryHint')}</p>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   )
 }
