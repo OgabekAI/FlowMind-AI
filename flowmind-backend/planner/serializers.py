@@ -41,7 +41,6 @@ class TaskSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'end_time': 'End time must be after start time.'
                 })
-            # Auto calculate duration
             diff = end_dt - start_dt
             attrs['duration_minutes'] = int(diff.total_seconds() / 60)
         return attrs

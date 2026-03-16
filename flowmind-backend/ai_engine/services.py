@@ -12,7 +12,6 @@ from .prompts import (
 
 
 def generate_plan_feedback(user, plan, language='en'):
-    """Generate AI feedback for a daily plan"""
     cache_key = f'plan_feedback_{plan.id}_{plan.completion_rate}_{language}'
     cached = cache.get(cache_key)
     if cached:
@@ -25,10 +24,8 @@ def generate_plan_feedback(user, plan, language='en'):
     prompt = get_daily_plan_feedback_prompt(user, plan, tasks, language)
     feedback = groq.chat(prompt, max_tokens=300)
 
-    # Cache for 1 hour
     cache.set(cache_key, feedback, 3600)
 
-    # Save to plan
     plan.ai_feedback = feedback
     plan.ai_feedback_updated = timezone.now()
     plan.save(update_fields=['ai_feedback', 'ai_feedback_updated'])
@@ -37,7 +34,6 @@ def generate_plan_feedback(user, plan, language='en'):
 
 
 def generate_goal_feedback(user, goal, language='en'):
-    """Generate AI coaching feedback for a goal"""
     cache_key = f'goal_feedback_{goal.id}_{goal.progress}_{language}'
     cached = cache.get(cache_key)
     if cached:
@@ -47,10 +43,8 @@ def generate_goal_feedback(user, goal, language='en'):
     prompt = get_goal_feedback_prompt(user, goal, milestones, language)
     feedback = groq.chat(prompt, max_tokens=300)
 
-    # Cache for 2 hours
     cache.set(cache_key, feedback, 7200)
 
-    # Save to goal
     goal.ai_feedback = feedback
     goal.ai_feedback_updated = timezone.now()
     goal.save(update_fields=['ai_feedback', 'ai_feedback_updated'])
@@ -59,12 +53,10 @@ def generate_goal_feedback(user, goal, language='en'):
 
 
 def generate_chat_response(user, message, language='en'):
-    """Generate AI chat response with full conversation history"""
     from goals.models import Goal
     from planner.models import DailyPlan
     from .models import ChatMessage
 
-    # Get user context
     recent_goals = Goal.objects.filter(
         user=user,
         status='active'
@@ -89,13 +81,11 @@ def generate_chat_response(user, message, language='en'):
         for t in today_tasks
     ]) or "No tasks for today."
 
-    # Get last 10 messages for conversation history
     history = ChatMessage.objects.filter(
         user=user
     ).order_by('-timestamp')[:10]
     history = list(reversed(history))
 
-    # Build messages array
     messages = [
         {
             "role": "system",
@@ -103,20 +93,17 @@ def generate_chat_response(user, message, language='en'):
         }
     ]
 
-    # Add conversation history
     for msg in history:
         messages.append({
             "role": msg.role,
             "content": msg.content
         })
 
-    # Add current message
     messages.append({
         "role": "user",
         "content": message
     })
 
-    # Call Groq API with full conversation
     headers = {
         "Authorization": f"Bearer {settings.GROQ_API_KEY}",
         "Content-Type": "application/json",
@@ -148,7 +135,6 @@ def generate_chat_response(user, message, language='en'):
 
 
 def generate_weekly_summary(user, stats, language='en'):
-    """Generate AI weekly summary"""
     cache_key = f'weekly_summary_{user.id}_{timezone.now().isocalendar()[1]}_{language}'
     cached = cache.get(cache_key)
     if cached:
@@ -157,7 +143,6 @@ def generate_weekly_summary(user, stats, language='en'):
     prompt = get_weekly_summary_prompt(user, stats, language)
     summary = groq.chat(prompt, max_tokens=400)
 
-    # Cache for 24 hours
     cache.set(cache_key, summary, 86400)
 
     return summary

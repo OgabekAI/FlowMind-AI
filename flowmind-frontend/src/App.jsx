@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Profile from './pages/Profile'
-
-// Pages
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -11,8 +9,6 @@ import Planner from './pages/Planner'
 import AIChat from './pages/AIChat'
 import Analytics from './pages/Analytics'
 import Pomodoro from './pages/Pomodoro'
-
-// Components
 import Sidebar from './components/Sidebar'
 import LoadingScreen from './components/LoadingScreen'
 

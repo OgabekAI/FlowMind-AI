@@ -41,17 +41,15 @@ export default function Dashboard() {
     return t('dashboard.goodEvening')
   }
 
-  // Translate day names from English abbreviations
   const translateDay = (dayName) => {
     const days = {
-      en: { Mon:'Mon', Tue:'Tue', Wed:'Wed', Thu:'Thu', Fri:'Fri', Sat:'Sat', Sun:'Sun' },
-      uz: { Mon:'Du', Tue:'Se', Wed:'Ch', Thu:'Pa', Fri:'Ju', Sat:'Sh', Sun:'Ya' },
-      ru: { Mon:'Пн', Tue:'Вт', Wed:'Ср', Thu:'Чт', Fri:'Пт', Sat:'Сб', Sun:'Вс' },
+      en: { Mon: 'Mon', Tue: 'Tue', Wed: 'Wed', Thu: 'Thu', Fri: 'Fri', Sat: 'Sat', Sun: 'Sun' },
+      uz: { Mon: 'Du', Tue: 'Se', Wed: 'Ch', Thu: 'Pa', Fri: 'Ju', Sat: 'Sh', Sun: 'Ya' },
+      ru: { Mon: 'Пн', Tue: 'Вт', Wed: 'Ср', Thu: 'Чт', Fri: 'Пт', Sat: 'Сб', Sun: 'Вс' },
     }
     return days[i18n.language]?.[dayName] || dayName
   }
 
-  // Hour unit per language
   const hourUnit = i18n.language === 'uz' ? 's' : i18n.language === 'ru' ? 'ч' : 'h'
   const minUnit = i18n.language === 'uz' ? 'daq' : i18n.language === 'ru' ? 'мин' : 'min'
 
@@ -141,7 +139,7 @@ export default function Dashboard() {
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
 
-        {/* HEADER */}
+
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32 }}>
           <div>
             <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>
@@ -169,7 +167,7 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* STATS ROW */}
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
           {[
             { icon: '🔥', value: `${weeklyStats?.summary?.completion_rate || 0}%`, label: t('dashboard.weeklyCompletion'), accent: '#7c6aff' },
@@ -199,7 +197,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* AI COACH BANNER */}
+
         <div style={{ ...GLASS_PURPLE, padding: 20, marginBottom: 24 }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(124,106,255,0.5), transparent)' }} />
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, position: 'relative', zIndex: 1 }}>
@@ -243,10 +241,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* MAIN GRID */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 20, marginBottom: 20 }}>
-
-          {/* TODAY'S PLAN */}
           <div style={{ ...GLASS, padding: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>{t('dashboard.todayPlan')}</h2>
@@ -326,7 +321,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* ACTIVE GOALS */}
+
           <div style={{ ...GLASS_PURPLE, padding: 24 }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(124,106,255,0.5), transparent)' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -362,8 +357,8 @@ export default function Dashboard() {
                             {goal.days_remaining > 0
                               ? `📅 ${goal.days_remaining} ${t('common.daysRemaining')}`
                               : goal.days_remaining === 0
-                              ? `⚡ ${t('common.dueToday')}`
-                              : `⚠️ ${t('common.overdue')}`}
+                                ? `⚡ ${t('common.dueToday')}`
+                                : `⚠️ ${t('common.overdue')}`}
                           </p>
                         )}
                       </div>
@@ -375,10 +370,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* WEEKLY CHART + QUICK ACCESS */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 20 }}>
-
-          {/* WEEKLY CHART */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>{t('analytics.weeklyStats')}</h2>
             {!weeklyStats?.days?.length ? (
@@ -421,7 +413,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* QUICK ACCESS */}
+
           <div style={{ ...GLASS, padding: 24 }}>
             <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>{t('dashboard.quickAccess')}</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

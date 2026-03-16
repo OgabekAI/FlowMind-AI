@@ -5,6 +5,27 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .serializers import RegisterSerializer, UserProfileSerializer
 from .models import User
+from rest_framework.permissions import IsAdminUser
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class AdminUsersView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        users = User.objects.all()
+        data = [{
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "is_active": u.is_active,
+            "date_joined": u.date_joined,
+        } for u in users]
+        return Response({
+            "total": users.count(),
+            "users": data
+        })
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

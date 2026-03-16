@@ -20,7 +20,6 @@ export default function AIChat() {
     try {
       const res = await api.get('/api/ai/chat/')
       const all = res.data.results || res.data
-      // Filter out messages before the last clear action
       const clearedAt = localStorage.getItem('chat_cleared_at')
       const filtered = clearedAt
         ? all.filter(m => new Date(m.timestamp) > new Date(clearedAt))
@@ -60,7 +59,6 @@ export default function AIChat() {
       <BlobBackground />
       <style>{`@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} } @keyframes onlinePulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
 
-      {/* HEADER */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 16, padding: '16px 24px',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -86,7 +84,6 @@ export default function AIChat() {
         </div>
       </div>
 
-      {/* MESSAGES */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', zIndex: 1 }}>
         {fetching ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -151,8 +148,6 @@ export default function AIChat() {
           </>
         )}
       </div>
-
-      {/* QUICK PROMPTS */}
       {messages.length > 0 && !loading && (
         <div style={{ padding: '8px 24px', display: 'flex', gap: 8, overflowX: 'auto', flexShrink: 0, position: 'relative', zIndex: 2 }}>
           {suggestedPrompts.slice(0, 4).map((prompt, i) => (
@@ -163,8 +158,6 @@ export default function AIChat() {
           ))}
         </div>
       )}
-
-      {/* INPUT */}
       <div style={{
         padding: '16px 24px', background: 'rgba(255,255,255,0.03)',
         borderTop: '1px solid rgba(255,255,255,0.06)',

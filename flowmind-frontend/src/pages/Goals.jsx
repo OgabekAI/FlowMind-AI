@@ -139,7 +139,6 @@ export default function Goals() {
       <BlobBackground />
       <div style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* HEADER */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>{t('goals.title')}</h1>
@@ -151,7 +150,6 @@ export default function Goals() {
           >+ {t('goals.addGoal')}</button>
         </div>
 
-        {/* GOALS GRID */}
         {goals.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 0' }}>
             <div style={{ fontSize: 60, marginBottom: 16 }}>🎯</div>
@@ -169,7 +167,6 @@ export default function Goals() {
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
                 >
-                  {/* GOAL HEADER */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 12, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
@@ -192,7 +189,6 @@ export default function Goals() {
 
                   {goal.description && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{goal.description}</p>}
 
-                  {/* PROGRESS */}
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                       <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t('goals.progress')}</span>
@@ -206,7 +202,6 @@ export default function Goals() {
                       style={{ width: '100%', accentColor: '#7c6aff', cursor: 'pointer', height: 4 }} />
                   </div>
 
-                  {/* STATUS + DEADLINE */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ background: sc.bg, color: sc.color, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 8 }}>{t(`goals.status.${goal.status}`)}</span>
                     {goal.deadline && (
@@ -216,7 +211,6 @@ export default function Goals() {
                     )}
                   </div>
 
-                  {/* AI FEEDBACK */}
                   {aiFeedback[goal.id] ? (
                     <div style={{ ...GLASS_PURPLE, padding: 12 }}>
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(124,106,255,0.5),transparent)' }} />
@@ -235,7 +229,6 @@ export default function Goals() {
           </div>
         )}
 
-        {/* ADD/EDIT MODAL */}
         {showModal && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
             <div style={{ ...GLASS, padding: 24, width: '100%', maxWidth: 480 }}>
@@ -277,7 +270,6 @@ export default function Goals() {
           </div>
         )}
 
-        {/* DELETE MODAL */}
         {deleteId && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
             <div style={{ ...GLASS, padding: 24, width: '100%', maxWidth: 380, textAlign: 'center' }}>

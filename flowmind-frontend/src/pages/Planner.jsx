@@ -4,7 +4,6 @@ import i18n from '../i18n'
 import api from '../api/axios'
 import BlobBackground from '../components/BlobBackground'
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
 
 const catColors = {
   study: { dot: '#7c6aff', bg: 'rgba(124,106,255,0.15)', color: '#7c6aff' },
@@ -54,7 +53,6 @@ const GLASS = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(25
 const GLASS_PURPLE = { background: 'rgba(124,106,255,0.06)', border: '1px solid rgba(124,106,255,0.15)', backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)', borderRadius: 20, position: 'relative', overflow: 'hidden' }
 const INPUT = { width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, padding: '11px 14px', color: '#fff', fontSize: 14, outline: 'none', fontFamily: 'inherit' }
 
-// ══════════════════════════════════════════════════════════════════════════════
 export default function Planner() {
   const { t } = useTranslation()
 
@@ -228,7 +226,6 @@ export default function Planner() {
       <BlobBackground />
       <div style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* HEADER */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>{t('planner.title')}</h1>
@@ -242,7 +239,6 @@ export default function Planner() {
           >+ {t('planner.addTask')}</button>
         </div>
 
-        {/* TAB SWITCHER */}
         <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 4, display: 'inline-flex', gap: 4, marginBottom: 24 }}>
           {[['today', t('planner.todayView')], ['week', t('planner.weeklyView')]].map(([tab, label]) => (
             <button key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -254,10 +250,8 @@ export default function Planner() {
           ))}
         </div>
 
-        {/* ══════════════ TODAY TAB ══════════════ */}
         {activeTab === 'today' && (
           <>
-            {/* PROGRESS CARD */}
             <div style={{ ...GLASS, padding: '18px 22px', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
@@ -270,8 +264,6 @@ export default function Planner() {
                 <div style={{ height: '100%', width: `${completion}%`, background: 'linear-gradient(90deg, #7c6aff, #a855f7)', borderRadius: 999, boxShadow: '0 0 8px rgba(124,106,255,0.6)', transition: 'width 0.7s ease' }} />
               </div>
             </div>
-
-            {/* AI FEEDBACK */}
             {aiFeedback ? (
               <div style={{ ...GLASS_PURPLE, padding: '16px 20px', marginBottom: 16 }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(124,106,255,0.5),transparent)' }} />
@@ -292,8 +284,6 @@ export default function Planner() {
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
               >{loadingAi ? '🤖 Thinking...' : `🤖 ${t('planner.getAiFeedback')}`}</button>
             )}
-
-            {/* TASKS LIST */}
             {totalTasks === 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>📋</div>
@@ -319,7 +309,6 @@ export default function Planner() {
                       onMouseEnter={e => { if (!task.is_done) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)'; e.currentTarget.style.transform = 'translateX(2px)' } }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateX(0)' }}
                     >
-                      {/* Checkbox */}
                       <button
                         onClick={() => handleToggle(task.id, null)}
                         style={{
@@ -334,10 +323,8 @@ export default function Planner() {
                         onMouseLeave={e => { if (!task.is_done) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' }}
                       >{task.is_done && '✓'}</button>
 
-                      {/* Category strip */}
                       <div style={{ width: 3, height: 36, borderRadius: 4, background: c.dot, flexShrink: 0, boxShadow: `0 0 8px ${c.dot}60` }} />
 
-                      {/* Content */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: 13, fontWeight: 500, color: task.is_done ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: task.is_done ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {task.title}
@@ -350,13 +337,11 @@ export default function Planner() {
                         </div>
                       </div>
 
-                      {/* Badges */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                         <span style={{ background: c.bg, color: c.color, fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8 }}>{t(`goals.categories.${task.category}`) || task.category}</span>
                         <span style={{ background: p.bg, color: p.color, fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8 }}>{t(p.labelKey)}</span>
                       </div>
 
-                      {/* Actions */}
                       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                         <button onClick={() => openModal(task)} style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
@@ -373,7 +358,6 @@ export default function Planner() {
           </>
         )}
 
-        {/* ══════════════ WEEKLY TAB ══════════════ */}
         {activeTab === 'week' && (
           <div>
             {weekLoading ? (
@@ -403,7 +387,6 @@ export default function Planner() {
                       borderColor: isToday ? 'rgba(124,106,255,0.4)' : undefined,
                       background: isToday ? 'rgba(124,106,255,0.05)' : undefined,
                     }}>
-                      {/* DAY HEADER */}
                       <div
                         onClick={() => setExpandedDay(isExpanded ? null : dateKey)}
                         style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px', cursor: 'pointer', transition: 'background 0.2s' }}
@@ -440,7 +423,6 @@ export default function Planner() {
                         </div>
                       </div>
 
-                      {/* EXPANDED */}
                       {isExpanded && (
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 20px 16px' }}>
                           {sortedDay.length === 0 ? (
@@ -512,7 +494,6 @@ export default function Planner() {
           </div>
         )}
 
-        {/* ══════════════ ADD / EDIT MODAL ══════════════ */}
         {showModal && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
             <div style={{ ...GLASS, padding: 24, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }}>
@@ -573,7 +554,6 @@ export default function Planner() {
           </div>
         )}
 
-        {/* ══════════════ DELETE MODAL ══════════════ */}
         {deleteId && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
             <div style={{ ...GLASS, padding: 24, width: '100%', maxWidth: 360, textAlign: 'center' }}>

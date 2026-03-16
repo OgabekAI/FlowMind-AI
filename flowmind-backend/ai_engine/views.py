@@ -83,20 +83,17 @@ class ChatView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Save user message
         ChatMessage.objects.create(
             user=request.user,
             role='user',
             content=message
         )
 
-        # Get AI response
         language = request.headers.get('Accept-Language', 'en')[:2]
         if language not in ('uz', 'ru', 'en'):
             language = 'en'
         ai_response = generate_chat_response(request.user, message, language)
 
-        # Save AI message
         ai_msg = ChatMessage.objects.create(
             user=request.user,
             role='assistant',

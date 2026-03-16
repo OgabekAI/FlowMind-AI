@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third party
+    'drf_spectacular',  
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -28,7 +29,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
 
-    # Our apps
+    # apps
     'users',
     'goals',
     'planner',
@@ -111,6 +112,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # JWT — compatible with djangorestframework_simplejwt 5.5.1

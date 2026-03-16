@@ -55,14 +55,12 @@ export default function Register() {
     <div style={{ minHeight: '100vh', background: '#06060d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative' }}>
       <BlobBackground />
 
-      {/* Language switcher */}
       <div style={{ position: 'absolute', top: 24, right: 24, zIndex: 2 }}>
         <LanguageSwitcher />
       </div>
 
       <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
 
-        {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -75,7 +73,6 @@ export default function Register() {
           <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginTop: 6 }}>{t('common.tagline')}</p>
         </div>
 
-        {/* Card */}
         <div style={{
           background: 'rgba(255,255,255,0.04)',
           border: '1px solid rgba(255,255,255,0.08)',

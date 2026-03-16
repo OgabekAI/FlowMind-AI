@@ -56,7 +56,6 @@ export default function Profile() {
       <BlobBackground />
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 780, margin: '0 auto' }}>
 
-        {/* HEADER */}
         <div style={{ marginBottom: 36 }}>
           <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff' }}>{t('profile.title')}</h1>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginTop: 6 }}>{t('profile.subtitle')}</p>
@@ -64,7 +63,6 @@ export default function Profile() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-          {/* AVATAR CARD */}
           <div style={{ ...GLASS, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 24 }}>
             <div style={{
               width: 96, height: 96, borderRadius: 24,
@@ -83,7 +81,6 @@ export default function Profile() {
           </div>
 
 
-          {/* EDIT PROFILE */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>✏️ {t('profile.editProfile')}</h2>
 
@@ -120,7 +117,6 @@ export default function Profile() {
             </form>
           </div>
 
-          {/* CHANGE PASSWORD */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h2 style={{ color: '#fff', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>🔒 {t('profile.changePassword')}</h2>
 

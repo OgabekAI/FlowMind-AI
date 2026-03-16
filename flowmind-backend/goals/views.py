@@ -17,11 +17,9 @@ class GoalListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Goal.objects.filter(user=self.request.user)
-        # Filter by status
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-        # Filter by category
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
@@ -106,7 +104,6 @@ class MilestoneToggleView(APIView):
         milestone.is_done = not milestone.is_done
         milestone.save()
 
-        # Auto update goal progress based on milestones
         total = goal.milestones.count()
         if total > 0:
             done = goal.milestones.filter(is_done=True).count()

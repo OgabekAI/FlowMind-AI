@@ -6,7 +6,6 @@ import BlobBackground from '../components/BlobBackground'
 export default function Pomodoro() {
   const { t } = useTranslation()
 
-  // ── Settings ─────────────────────────────────────────────────────────────
   const [settings, setSettings] = useState({
     focus_minutes: 25, short_break_minutes: 5,
     long_break_minutes: 15, sessions_before_long_break: 4,
@@ -14,16 +13,14 @@ export default function Pomodoro() {
   const [showSettings, setShowSettings] = useState(false)
   const [settingsForm, setSettingsForm] = useState({ ...settings })
 
-  // ── Timer ─────────────────────────────────────────────────────────────────
   const [mode, setMode] = useState('focus')
   const [timeLeft, setTimeLeft] = useState(25 * 60)
   const [isRunning, setIsRunning] = useState(false)
   const [currentSession, setCurrentSession] = useState(null)
   const [timerFinished, setTimerFinished] = useState(false)
   const intervalRef = useRef(null)
-  const restoredRef = useRef(false) // true when timer was restored from localStorage
+  const restoredRef = useRef(false)
 
-  // ── Stats / History / Tasks ────────────────────────────────────────────────
   const [stats, setStats] = useState(null)
   const [history, setHistory] = useState([])
   const [tasks, setTasks] = useState([])
@@ -62,7 +59,7 @@ export default function Pomodoro() {
     } else {
       localStorage.removeItem('pmdr_timer')
     }
-  }, [isRunning]) // only on start/stop, not every tick
+  }, [isRunning])
 
   useEffect(() => {
     if (isRunning) {
@@ -152,7 +149,6 @@ export default function Pomodoro() {
   const formatTime = (seconds) =>
     `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`
 
-  // ── Derived ───────────────────────────────────────────────────────────────
   const totalSeconds = getDuration(mode) * 60
   const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100
   const circumference = 2 * Math.PI * 165
@@ -164,7 +160,6 @@ export default function Pomodoro() {
   }
   const current = modeConfig[mode]
 
-  // ── Reusable styles ───────────────────────────────────────────────────────
   const iconBtn = {
     width: 64, height: 64, borderRadius: '50%',
     background: 'rgba(255,255,255,0.06)',
@@ -191,14 +186,12 @@ export default function Pomodoro() {
     <div style={{ minHeight: '100vh', background: '#06060d', position: 'relative' }}>
       <BlobBackground />
 
-      {/* ── Centered content column ─────────────────────────────────────────── */}
       <div style={{
         position: 'relative', zIndex: 1,
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         minHeight: '100vh', padding: '32px 24px',
       }}>
 
-        {/* 1. HEADER */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', maxWidth: 760, marginBottom: 36 }}>
           <div>
             <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 30, margin: 0 }}>{t('pomodoro.title')}</h1>
@@ -217,7 +210,6 @@ export default function Pomodoro() {
           >⚙️ {t('pomodoro.settings')}</button>
         </div>
 
-        {/* 2. MODE SWITCHER — pill tabs */}
         <div style={{
           display: 'flex', gap: 6,
           background: 'rgba(255,255,255,0.06)',
@@ -242,12 +234,9 @@ export default function Pomodoro() {
           ))}
         </div>
 
-        {/* 3. TIMER CIRCLE */}
         <div style={{ position: 'relative', marginBottom: 52 }}>
           <svg width="380" height="380" style={{ transform: 'rotate(-90deg)', display: 'block' }}>
-            {/* Track */}
             <circle cx="190" cy="190" r="165" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="12" />
-            {/* Progress */}
             <circle
               cx="190" cy="190" r="165" fill="none"
               stroke={current.color} strokeWidth="12" strokeLinecap="round"
@@ -260,7 +249,6 @@ export default function Pomodoro() {
             />
           </svg>
 
-          {/* Center content */}
           <div style={{
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -283,19 +271,15 @@ export default function Pomodoro() {
           </div>
         </div>
 
-        {/* 4. CONTROLS */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
 
-          {/* IDLE — no active session */}
           {!currentSession && (
             <>
-              {/* 📌 Attach task */}
               <button onClick={() => setShowTaskPicker(true)} title="Attach task" style={iconBtn}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
               >📌</button>
 
-              {/* CENTER: ▶ start OR ↺ restart after finish */}
               {timerFinished ? (
                 <button
                   onClick={() => { setTimerFinished(false); setTimeLeft(getDuration(mode) * 60) }}
@@ -327,7 +311,6 @@ export default function Pomodoro() {
                 >▶</button>
               )}
 
-              {/* ⚙️ Settings */}
               <button onClick={() => setShowSettings(true)} style={iconBtn}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
@@ -335,7 +318,6 @@ export default function Pomodoro() {
             </>
           )}
 
-          {/* RUNNING */}
           {currentSession && isRunning && (
             <>
               <button onClick={handleCancel} style={cancelBtn}>✕</button>
@@ -354,12 +336,10 @@ export default function Pomodoro() {
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
               >⏸</button>
 
-              {/* spacer keeps center button pinned */}
               <div style={{ width: 64, height: 64 }} />
             </>
           )}
 
-          {/* PAUSED */}
           {currentSession && !isRunning && (
             <>
               <button onClick={handleCancel} style={cancelBtn}>✕</button>
@@ -378,13 +358,11 @@ export default function Pomodoro() {
                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
               >▶</button>
 
-              {/* spacer keeps center button pinned */}
               <div style={{ width: 64, height: 64 }} />
             </>
           )}
         </div>
 
-        {/* 5. SESSION DOTS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 32 }}>
           {Array.from({ length: settings.sessions_before_long_break }).map((_, i) => {
             const sessionsInCycle = (stats?.today?.sessions || 0) % settings.sessions_before_long_break
@@ -404,7 +382,6 @@ export default function Pomodoro() {
         </div>
 
 
-        {/* 6. STATS STRIP */}
         <div style={{
           display: 'flex', marginTop: 44, width: '100%', maxWidth: 760,
           background: 'rgba(255,255,255,0.04)',
@@ -428,7 +405,6 @@ export default function Pomodoro() {
 
       </div>
 
-      {/* 7. TASK PICKER MODAL */}
       {showTaskPicker && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
           <div style={GLASS_MODAL}>
@@ -436,7 +412,6 @@ export default function Pomodoro() {
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 16 }}>{t('pomodoro.attachTaskDesc')}</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto', marginBottom: 16 }}>
-              {/* No task option */}
               <button
                 onClick={() => { setSelectedTask(null); setShowTaskPicker(false) }}
                 style={{
@@ -472,7 +447,6 @@ export default function Pomodoro() {
         </div>
       )}
 
-      {/* 8. SETTINGS MODAL */}
       {showSettings && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
           <div style={{ ...GLASS_MODAL, maxWidth: 380 }}>

@@ -32,7 +32,6 @@ export default function Sidebar() {
       borderRight: '1px solid rgba(255,255,255,0.06)',
       display: 'flex', flexDirection: 'column', padding: '28px 16px', flexShrink: 0, overflowY: 'auto'
     }}>
-      {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '0 8px', marginBottom: 36 }}>
         <div style={{
           width: 42, height: 42, borderRadius: 12,
@@ -45,7 +44,6 @@ export default function Sidebar() {
         </span>
       </div>
 
-      {/* Nav */}
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
@@ -73,7 +71,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom section — glass card */}
       <div style={{
         background: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.07)',
@@ -82,15 +79,12 @@ export default function Sidebar() {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* top gradient glow line */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(124,106,255,0.4), transparent)' }} />
 
-        {/* Language Switcher */}
         <div style={{ marginBottom: 10 }}>
           <LanguageSwitcher />
         </div>
 
-        {/* Profile link */}
         <Link
           to="/profile"
           style={{
@@ -116,7 +110,6 @@ export default function Sidebar() {
           </div>
         </Link>
 
-        {/* Logout */}
         <button
           onClick={handleLogout}
           style={{

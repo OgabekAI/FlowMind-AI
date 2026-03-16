@@ -62,7 +62,6 @@ export default function Analytics() {
         <div style={{ background: 'rgba(18,18,26,0.97)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 14px', fontSize: 13 }}>
           <p style={{ color: '#fff', fontWeight: 700, marginBottom: 6 }}>{label}</p>
           {payload.map((p, i) => {
-            // Always use a legible color — completed=green, total=white, rate=green
             const color = p.dataKey === 'completed_tasks' || p.name?.toLowerCase().includes('completed') ? '#43e97b'
               : p.name?.toLowerCase().includes('rate') ? '#43e97b'
                 : '#fff'
@@ -96,13 +95,11 @@ export default function Analytics() {
       <BlobBackground />
       <div style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* HEADER */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>{t('analytics.title')}</h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 4 }}>{t('analytics.trackDesc')}</p>
           </div>
-          {/* TAB SWITCHER */}
           <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 4, display: 'flex', gap: 4 }}>
             {[['weekly', t('analytics.weeklyStats')], ['monthly', t('analytics.monthlyStats')]].map(([tab, label]) => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -115,7 +112,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* STATS */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
           {[
             { icon: '✅', value: stats?.summary?.completed_tasks || 0, label: t('analytics.completionRate'), sub: `${t('common.of', 'of')} ${stats?.summary?.total_tasks || 0} ${t('analytics.totalTasks').toLowerCase()}`, accent: '#7c6aff' },
@@ -136,9 +132,7 @@ export default function Analytics() {
           ))}
         </div>
 
-        {/* CHARTS */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-          {/* COMPLETION RATE */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.completionRate')}</h3>
             {chartData.length === 0 ? (
@@ -157,7 +151,6 @@ export default function Analytics() {
             )}
           </div>
 
-          {/* TASKS BAR */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.tasksOverview')}</h3>
             {chartData.length === 0 ? (
@@ -176,7 +169,6 @@ export default function Analytics() {
             )}
           </div>
 
-          {/* FOCUS HOURS */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.focusHours')}</h3>
             {chartData.length === 0 ? (
@@ -195,7 +187,6 @@ export default function Analytics() {
             )}
           </div>
 
-          {/* DAILY BREAKDOWN */}
           <div style={{ ...GLASS, padding: 24 }}>
             <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: 20 }}>{t('analytics.dailyBreakdown')}</h3>
             {chartData.length === 0 ? (
@@ -220,7 +211,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* AI WEEKLY SUMMARY */}
         <div style={{ ...GLASS_PURPLE, padding: 24 }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(124,106,255,0.5),transparent)' }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative', zIndex: 1 }}>
